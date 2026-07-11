@@ -1,5 +1,8 @@
-# Cloudflare Pages lee esta config en los builds con integración git.
-# El build de Pages solo compila lo commiteado; el sync corre siempre en local.
+# Worker de assets estáticos: `wrangler deploy` sube dist/ tal cual, sin código.
+# El build de Cloudflare solo compila lo commiteado; el sync corre siempre en local.
 name = "santiagoascii"
 compatibility_date = "2026-07-11"
-pages_build_output_dir = "dist"
+
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"
