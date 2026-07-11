@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+---
+
+<Base title="About" description={`Sobre ${SITE.author} y este sitio`}>
+  <div class="prose">
+    <h1>About</h1>
+    <p>
+      Soy {SITE.author}. Este blog reúne ensayos y bitácoras de lectura.
+    </p>
+    <p>
+      El contenido nace en un vault de Obsidian y se publica aquí. Puedes
+      suscribirte por <a href="/rss.xml">RSS</a>.
+    </p>
+    <!-- Placeholder: edita esta página con tu propio texto. -->
+  </div>
+</Base>

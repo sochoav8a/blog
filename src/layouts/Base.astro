@@ -1,0 +1,62 @@
+---
+import { SITE } from '../site';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+}
+
+const {
+  title,
+  description = SITE.description,
+  ogImage = '/og/default.png',
+  ogType = 'website',
+} = Astro.props;
+
+const pageTitle = title ? `${title} — ${SITE.title}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE.title}
+      href={new URL('rss.xml', Astro.site)}
+    />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:title" content={title ?? SITE.title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div class="mx-auto max-w-2xl px-5 py-10">
+      <header class="flex items-baseline justify-between border-b border-line pb-6">
+        <a href="/" class="font-semibold no-underline">{SITE.title}</a>
+        <nav class="flex gap-5 font-sans text-sm text-muted">
+          <a href="/about" class="no-underline hover:text-ink">about</a>
+          <a href="/rss.xml" class="no-underline hover:text-ink">rss</a>
+        </nav>
+      </header>
+      <main class="py-10">
+        <slot />
+      </main>
+      <footer class="border-t border-line pt-6 font-sans text-sm text-muted">
+        © {new Date().getFullYear()} {SITE.author}
+      </footer>
+    </div>
+  </body>
+</html>

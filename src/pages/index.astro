@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPublishedPosts, formatDate } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+---
+
+<Base>
+  <ul class="flex flex-col gap-8">
+    {
+      posts.map((post) => (
+        <li>
+          <time
+            datetime={post.data.date.toISOString()}
+            class="font-sans text-sm text-muted"
+          >
+            {formatDate(post.data.date)}
+          </time>
+          <h2 class="text-xl">
+            <a href={`/posts/${post.id}/`} class="no-underline hover:text-accent">
+              {post.data.title}
+            </a>
+          </h2>
+          <p class="mt-1 text-muted">{post.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

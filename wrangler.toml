@@ -1,0 +1,5 @@
+# Cloudflare Pages lee esta config en los builds con integración git.
+# El build de Pages solo compila lo commiteado; el sync corre siempre en local.
+name = "santiagoascii"
+compatibility_date = "2026-07-11"
+pages_build_output_dir = "dist"

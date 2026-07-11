@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+/*
+ * Tokens propios. Los namespaces de color, fuente y escala tipográfica de
+ * Tailwind se resetean con `initial`: solo existen las utilidades definidas
+ * aquí. Cambiar un valor aquí propaga a todo el sitio.
+ */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+
+  /* Colores */
+  --color-paper: #faf8f5;
+  --color-ink: #21201c;
+  --color-muted: #6f6b63;
+  --color-line: #e2ddd4;
+  --color-accent: #8a3324;
+
+  /* Tipografía */
+  --font-serif: "Georgia", "Times New Roman", serif;
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", monospace;
+
+  /* Escala tipográfica (base 18px para lectura larga) */
+  --text-sm: 0.833rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.65;
+  --text-lg: 1.2rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.44rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 1.728rem;
+  --text-2xl--line-height: 1.25;
+  --text-3xl: 2.074rem;
+  --text-3xl--line-height: 1.15;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+}
+
+a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-line);
+  text-underline-offset: 3px;
+}
+
+/*
+ * Prosa de los posts. Estilos base sobre el HTML que emite el markdown;
+ * itera aquí, no en las páginas.
+ */
+.prose {
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+}
+
+.prose h1 { font-size: var(--text-2xl); }
+.prose h2 { font-size: var(--text-xl); }
+.prose h3 { font-size: var(--text-lg); }
+
+.prose p {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose a {
+  text-decoration-color: var(--color-accent);
+}
+
+.prose a:hover {
+  color: var(--color-accent);
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--color-line);
+  padding-left: 1.25rem;
+  color: var(--color-muted);
+  font-style: italic;
+  margin: 1.5em 0;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+  margin: 1em 0;
+}
+
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+
+.prose li {
+  margin: 0.35em 0;
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.prose pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  overflow-x: auto;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  margin: 1.5em 0;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0;
+}
+
+/*
+ * Callouts (generados por scripts/sync-vault.ts a partir de > [!tipo]).
+ * Ganchos por tipo: .callout-note, .callout-warning, .callout-tip, etc.
+ */
+.prose .callout {
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 4px;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5em 0;
+}
+
+.prose .callout-title {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: 0;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--color-line);
+  margin: 2.5em 0;
+}
