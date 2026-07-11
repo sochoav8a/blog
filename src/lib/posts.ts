@@ -12,8 +12,9 @@ export async function getPublishedPosts(): Promise<Post[]> {
   return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
-// Las fechas del frontmatter parsean como medianoche UTC; formatear en UTC
-// evita que corran un día según la zona horaria de la máquina que compila.
+// Fechas ISO (YYYY-MM-DD), como metadatos de un archivo: parte de la estética
+// del sitio. Se corta el ISO completo, que ya está en UTC, para que la fecha
+// no corra un día según la zona horaria de la máquina que compila.
 export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('es', { dateStyle: 'long', timeZone: 'UTC' }).format(date);
+  return date.toISOString().slice(0, 10);
 }

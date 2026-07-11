@@ -18,6 +18,7 @@ const {
 
 const pageTitle = title ? `${title} — ${SITE.title}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const isHome = Astro.url.pathname === '/';
 ---
 
 <html lang="es">
@@ -27,13 +28,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={SITE.title}
-      href={new URL('rss.xml', Astro.site)}
-    />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preload" href="/fonts/Literata-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin />
     <meta property="og:title" content={title ?? SITE.title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
@@ -43,19 +40,27 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
-    <div class="mx-auto max-w-2xl px-5 py-10">
-      <header class="flex items-baseline justify-between border-b border-line pb-6">
-        <a href="/" class="font-semibold no-underline">{SITE.title}</a>
-        <nav class="flex gap-5 font-sans text-sm text-muted">
-          <a href="/about" class="no-underline hover:text-ink">about</a>
-          <a href="/rss.xml" class="no-underline hover:text-ink">rss</a>
+    <div class="mx-auto max-w-[40rem] px-5 py-9">
+      <header class="flex items-baseline justify-between font-mono text-sm">
+        {
+          isHome ? (
+            <span class="text-muted">~/{SITE.title}</span>
+          ) : (
+            <a href="/" class="font-semibold no-underline hover:text-accent">{SITE.title}</a>
+          )
+        }
+        <nav>
+          <a href="/about" class="text-muted no-underline hover:text-accent">about</a>
         </nav>
       </header>
-      <main class="py-10">
+      <main class="py-12">
         <slot />
       </main>
-      <footer class="border-t border-line pt-6 font-sans text-sm text-muted">
-        © {new Date().getFullYear()} {SITE.author}
+      <footer
+        class="flex items-baseline justify-between border-t border-line pt-5 font-mono text-xs text-muted"
+      >
+        <span>© {new Date().getFullYear()} {SITE.author}</span>
+        <span>texto plano</span>
       </footer>
     </div>
   </body>

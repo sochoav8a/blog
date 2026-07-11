@@ -20,14 +20,14 @@ const { posts } = Astro.props;
 ---
 
 <Base title={`#${tag}`} description={`Posts etiquetados con #${tag}`}>
-  <h1 class="text-2xl">#{tag}</h1>
-  <ul class="mt-8 flex flex-col gap-4">
+  <h1 class="font-mono text-lg font-semibold">#{tag}</h1>
+  <ul class="mt-10 flex flex-col gap-5">
     {
       posts.map((post) => (
-        <li class="flex items-baseline gap-4">
+        <li class="flex flex-col gap-x-5 gap-y-0 sm:flex-row sm:items-baseline">
           <time
             datetime={post.data.date.toISOString()}
-            class="shrink-0 font-sans text-sm text-muted"
+            class="shrink-0 font-mono text-xs text-muted"
           >
             {formatDate(post.data.date)}
           </time>

@@ -1,22 +1,40 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getPublishedPosts, formatDate } from '../lib/posts';
+import { SITE } from '../site';
 
 const posts = await getPublishedPosts();
+
+// figlet Small, dos líneas: "santiago" / "ascii" alineado a la derecha.
+const masthead = [
+  '               _   _',
+  '  ___ __ _ _ _| |_(_)__ _ __ _ ___',
+  " (_-</ _` | ' \\  _| / _` / _` / _ \\",
+  ' /__/\\__,_|_||_\\__|_\\__,_\\__, \\___/',
+  '                         |___/',
+  '                                _ _',
+  '                   __ _ ___ __(_|_)',
+  '                  / _` (_-</ _| | |',
+  '                  \\__,_/__/\\__|_|_|',
+].join('\n');
 ---
 
 <Base>
-  <ul class="flex flex-col gap-8">
+  <h1 class="sr-only">{SITE.title}</h1>
+  <pre class="masthead" role="img" aria-label={SITE.title}>{masthead}</pre>
+  <p class="mt-6 font-mono text-sm text-muted">
+    {SITE.description.toLowerCase().replace(/\.$/, '')}
+    <span class="cursor" aria-hidden="true"></span>
+  </p>
+
+  <ul class="mt-16 flex flex-col gap-10">
     {
       posts.map((post) => (
         <li>
-          <time
-            datetime={post.data.date.toISOString()}
-            class="font-sans text-sm text-muted"
-          >
+          <time datetime={post.data.date.toISOString()} class="font-mono text-xs text-muted">
             {formatDate(post.data.date)}
           </time>
-          <h2 class="text-xl">
+          <h2 class="mt-1 text-lg font-semibold">
             <a href={`/posts/${post.id}/`} class="no-underline hover:text-accent">
               {post.data.title}
             </a>

@@ -7,8 +7,8 @@ import { SITE } from '../../site';
 // 1200×630 por post, más /og/default.png para el resto de páginas.
 // Los paths son relativos a la raíz del proyecto (cwd durante astro build):
 // import.meta.url apunta al bundle en dist/ y no sirve para localizar assets.
-const fontRegular = readFile('./src/assets/og/SourceSerif4-Regular.ttf');
-const fontSemiBold = readFile('./src/assets/og/SourceSerif4-SemiBold.ttf');
+const fontRegular = readFile('./src/assets/og/Literata-Regular.ttf');
+const fontSemiBold = readFile('./src/assets/og/Literata-SemiBold.ttf');
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
@@ -42,26 +42,26 @@ export async function GET({ props }: { props: Props }) {
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: '72px 80px',
-        backgroundColor: '#faf8f5',
-        color: '#21201c',
-        fontFamily: 'Source Serif 4',
-        borderTop: '16px solid #8a3324',
+        backgroundColor: '#f4f5f2',
+        color: '#1a1d1c',
+        fontFamily: 'Literata',
+        borderLeft: '20px solid #1d3fbb',
       },
       [
         node(
           'div',
-          { fontSize: 64, fontWeight: 600, lineHeight: 1.15, lineClamp: 4 },
+          { fontSize: 62, fontWeight: 600, lineHeight: 1.15, lineClamp: 4 },
           props.title,
         ),
-        node('div', { fontSize: 30, color: '#6f6b63' }, props.subtitle),
+        node('div', { fontSize: 28, color: '#5c6461' }, props.subtitle),
       ],
     ),
     {
       width: 1200,
       height: 630,
       fonts: [
-        { name: 'Source Serif 4', data: await fontRegular, weight: 400, style: 'normal' },
-        { name: 'Source Serif 4', data: await fontSemiBold, weight: 600, style: 'normal' },
+        { name: 'Literata', data: await fontRegular, weight: 400, style: 'normal' },
+        { name: 'Literata', data: await fontSemiBold, weight: 600, style: 'normal' },
       ],
     },
   );
