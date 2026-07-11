@@ -29,8 +29,8 @@ const isHome = Astro.url.pathname === '/';
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="preload" href="/fonts/Literata-var.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/CourierPrime-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/CourierPrime-700.woff2" as="font" type="font/woff2" crossorigin />
     <meta property="og:title" content={title ?? SITE.title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
@@ -46,7 +46,7 @@ const isHome = Astro.url.pathname === '/';
           isHome ? (
             <span class="text-muted">~/{SITE.title}</span>
           ) : (
-            <a href="/" class="font-semibold no-underline hover:text-accent">{SITE.title}</a>
+            <a href="/" class="font-bold no-underline hover:text-accent">{SITE.title}</a>
           )
         }
         <nav>

@@ -5,23 +5,36 @@ import { SITE } from '../site';
 
 const posts = await getPublishedPosts();
 
-// figlet Small, dos líneas: "santiago" / "ascii" alineado a la derecha.
-const masthead = [
-  '               _   _',
-  '  ___ __ _ _ _| |_(_)__ _ __ _ ___',
-  " (_-</ _` | ' \\  _| / _` / _` / _ \\",
-  ' /__/\\__,_|_||_\\__|_\\__,_\\__, \\___/',
-  '                         |___/',
-  '                                _ _',
-  '                   __ _ ___ __(_|_)',
-  '                  / _` (_-</ _| | |',
-  '                  \\__,_/__/\\__|_|_|',
-].join('\n');
+// figlet Standard, dos bloques: "santiago" y, debajo, "ascii" alineado a su
+// borde derecho (el padding se calcula, no se ajusta a ojo).
+const santiagoLines = [
+  '                  _   _',
+  '  ___  __ _ _ __ | |_(_) __ _  __ _  ___',
+  " / __|/ _` | '_ \\| __| |/ _` |/ _` |/ _ \\",
+  ' \\__ \\ (_| | | | | |_| | (_| | (_| | (_) |',
+  ' |___/\\__,_|_| |_|\\__|_|\\__,_|\\__, |\\___/',
+  '                              |___/',
+];
+const asciiLines = [
+  '                 _ _',
+  '   __ _ ___  ___(_|_)',
+  '  / _` / __|/ __| | |',
+  ' | (_| \\__ \\ (__| | |',
+  '  \\__,_|___/\\___|_|_|',
+];
+const widthSantiago = Math.max(...santiagoLines.map((line) => line.length));
+const widthAscii = Math.max(...asciiLines.map((line) => line.length));
+const pad = ' '.repeat(Math.max(0, widthSantiago - widthAscii));
+const mastheadSantiago = santiagoLines.join('\n');
+const mastheadAscii = asciiLines.map((line) => pad + line).join('\n');
 ---
 
 <Base>
   <h1 class="sr-only">{SITE.title}</h1>
-  <pre class="masthead" role="img" aria-label={SITE.title}>{masthead}</pre>
+  <pre
+    class="masthead"
+    role="img"
+    aria-label={SITE.title}>{mastheadSantiago + '\n'}<span class="text-accent">{mastheadAscii}</span></pre>
   <p class="mt-6 font-mono text-sm text-muted">
     {SITE.description.toLowerCase().replace(/\.$/, '')}
     <span class="cursor" aria-hidden="true"></span>
@@ -34,7 +47,7 @@ const masthead = [
           <time datetime={post.data.date.toISOString()} class="font-mono text-xs text-muted">
             {formatDate(post.data.date)}
           </time>
-          <h2 class="mt-1 text-lg font-semibold">
+          <h2 class="mt-1 text-lg font-bold">
             <a href={`/posts/${post.id}/`} class="no-underline hover:text-accent">
               {post.data.title}
             </a>
