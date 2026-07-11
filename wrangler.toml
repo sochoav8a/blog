@@ -1,6 +1,6 @@
 # Worker de assets estáticos: `wrangler deploy` sube dist/ tal cual, sin código.
 # El build de Cloudflare solo compila lo commiteado; el sync corre siempre en local.
-name = "santiagoascii"
+name = "blog"
 compatibility_date = "2026-07-11"
 
 [assets]
