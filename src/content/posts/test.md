@@ -8,3 +8,4 @@ draft: false
 ---
 
 espero escribir tanto como pienso
+![](/img/Pasted%20image%2020260711210047.png)
