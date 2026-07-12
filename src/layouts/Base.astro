@@ -40,28 +40,35 @@ const isHome = Astro.url.pathname === '/';
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
-    <div class="mx-auto max-w-[40rem] px-5 py-9">
-      <header class="flex items-baseline justify-between font-mono text-sm">
-        {
-          isHome ? (
-            <span class="text-muted">~/{SITE.title}</span>
-          ) : (
-            <a href="/" class="font-bold no-underline hover:text-accent">{SITE.title}</a>
-          )
-        }
-        <nav>
-          <a href="/about" class="text-muted no-underline hover:text-accent">about</a>
-        </nav>
-      </header>
-      <main class="py-12">
-        <slot />
-      </main>
-      <footer
-        class="flex items-baseline justify-between border-t border-line pt-5 font-mono text-xs text-muted"
-      >
-        <span>© {new Date().getFullYear()} {SITE.author}</span>
-        <span>texto plano</span>
-      </footer>
+    <!-- Tríptico: riel | columna de lectura | riel. Los rieles (slots opcionales,
+         ver AsciiRail) solo existen desde lg; debajo el centro se comporta como
+         siempre (bloque centrado de 40rem). -->
+    <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_40rem_minmax(0,1fr)]">
+      <div class="hidden lg:block"><slot name="rail-left" /></div>
+      <div class="mx-auto w-full max-w-[40rem] px-5 py-9">
+        <header class="flex items-baseline justify-between font-mono text-sm">
+          {
+            isHome ? (
+              <span class="text-muted">~/{SITE.title}</span>
+            ) : (
+              <a href="/" class="font-bold no-underline hover:text-accent">{SITE.title}</a>
+            )
+          }
+          <nav>
+            <a href="/about" class="text-muted no-underline hover:text-accent">about</a>
+          </nav>
+        </header>
+        <main class="py-12">
+          <slot />
+        </main>
+        <footer
+          class="flex items-baseline justify-between border-t border-line pt-5 font-mono text-xs text-muted"
+        >
+          <span>© {new Date().getFullYear()} {SITE.author}</span>
+          <span>texto plano</span>
+        </footer>
+      </div>
+      <div class="hidden lg:block"><slot name="rail-right" /></div>
     </div>
   </body>
 </html>

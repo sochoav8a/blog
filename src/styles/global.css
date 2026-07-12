@@ -130,6 +130,72 @@
   }
 }
 
+/* --- Rieles ASCII laterales (AsciiRail; el arte va en src/ascii/rails.ts) --- */
+
+.rail {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(1rem, 2.5vw, 4rem);
+  overflow: hidden;
+  user-select: none;
+}
+
+.rail-left {
+  justify-content: flex-end;
+}
+
+.rail-right {
+  justify-content: flex-start;
+}
+
+.rail-art {
+  /* Escala con el viewport: legible en una portátil de 1280–1366px
+   * sin robarle sitio a la columna de lectura. */
+  font-size: clamp(0.55rem, 0.9vw, 0.8rem);
+  line-height: 1.3;
+  color: var(--color-line);
+  white-space: pre;
+  max-height: 100%;
+  overflow: hidden;
+  /* Si el arte es más alto que el viewport, se desvanece en los bordes
+   * en vez de cortarse en seco. */
+  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+/* Marcador mientras no hay arte: una columna punteada que señala el hueco. */
+.rail-placeholder {
+  width: 7rem;
+  height: min(60dvh, 26rem);
+  border: 1px dashed var(--color-line);
+}
+
+/* --- Chips de tags del buscador (portada) --- */
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  color: var(--color-muted);
+  background: none;
+  border: 1px solid var(--color-line);
+  padding: 0.1rem 0.55rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.chip[aria-pressed='true'] {
+  color: var(--color-paper);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
 /*
  * Prosa de los posts. Itera aquí, no en las páginas.
  */

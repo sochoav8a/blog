@@ -1,5 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
+import AsciiRail from '../../components/AsciiRail.astro';
+import { railLeft, railRight } from '../../ascii/rails';
 import { getPublishedPosts, formatDate, type Post } from '../../lib/posts';
 
 export async function getStaticPaths() {
@@ -20,6 +22,9 @@ const { posts } = Astro.props;
 ---
 
 <Base title={`#${tag}`} description={`Posts etiquetados con #${tag}`}>
+  <AsciiRail slot="rail-left" art={railLeft} align="left" />
+  <AsciiRail slot="rail-right" art={railRight} align="right" />
+
   <h1 class="text-lg font-bold text-accent">#{tag}</h1>
   <ul class="mt-10 flex flex-col gap-5">
     {

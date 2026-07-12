@@ -1,9 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
+import AsciiRail from '../components/AsciiRail.astro';
+import { railLeft, railRight } from '../ascii/rails';
 import { getPublishedPosts, formatDate } from '../lib/posts';
 import { SITE } from '../site';
 
 const posts = await getPublishedPosts();
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
 
 // figlet Standard, dos bloques: "santiago" y, debajo, "ascii" alineado a su
 // borde derecho (el padding se calcula, no se ajusta a ojo).
@@ -30,6 +33,9 @@ const mastheadAscii = asciiLines.map((line) => pad + line).join('\n');
 ---
 
 <Base>
+  <AsciiRail slot="rail-left" art={railLeft} align="left" />
+  <AsciiRail slot="rail-right" art={railRight} align="right" />
+
   <h1 class="sr-only">{SITE.title}</h1>
   <pre
     class="masthead"
@@ -40,10 +46,48 @@ const mastheadAscii = asciiLines.map((line) => pad + line).join('\n');
     <span class="cursor" aria-hidden="true"></span>
   </p>
 
-  <ul class="mt-16 flex flex-col gap-10">
+  <!-- Buscador cliente: filtra el listado por título/descripción/tags.
+       Arranca oculto y lo revela el script, así sin JS no hay UI muerta
+       (las páginas /tags/ siguen siendo la vía navegable). -->
+  <section data-filter hidden class="mt-14 font-mono" aria-label="Buscar y filtrar posts">
+    <label
+      class="flex items-baseline gap-2 border border-line bg-wash px-4 py-2 focus-within:border-accent"
+    >
+      <span class="font-bold text-accent" aria-hidden="true">&gt;</span>
+      <input
+        type="search"
+        placeholder="buscar…"
+        aria-label="Buscar por título, descripción o tag"
+        class="w-full min-w-0 bg-transparent text-sm caret-accent outline-none placeholder:text-muted"
+      />
+      <span id="filter-count" class="shrink-0 text-xs text-muted" aria-live="polite"
+        >{posts.length}/{posts.length}</span
+      >
+    </label>
+    {
+      allTags.length > 0 && (
+        <div class="mt-3 flex flex-wrap gap-2">
+          {allTags.map((tag) => (
+            <button type="button" class="chip" data-chip={tag} aria-pressed="false">
+              #{tag}
+            </button>
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <ul id="post-list" class="mt-14 flex flex-col gap-10">
     {
       posts.map((post) => (
-        <li>
+        <li
+          data-post={[
+            post.data.title,
+            post.data.description,
+            ...post.data.tags.map((tag) => `#${tag}`),
+          ].join(' ')}
+          data-tags={post.data.tags.join(' ')}
+        >
           <time datetime={post.data.date.toISOString()} class="font-mono text-xs text-muted">
             {formatDate(post.data.date)}
           </time>
@@ -53,8 +97,79 @@ const mastheadAscii = asciiLines.map((line) => pad + line).join('\n');
             </a>
           </h2>
           <p class="mt-1 text-muted">{post.data.description}</p>
+          {post.data.tags.length > 0 && (
+            <p class="mt-2 flex flex-wrap gap-x-3 font-mono text-xs">
+              {post.data.tags.map((tag) => (
+                <a href={`/tags/${tag}/`} class="text-muted no-underline hover:text-accent">
+                  #{tag}
+                </a>
+              ))}
+            </p>
+          )}
         </li>
       ))
     }
   </ul>
+  <p id="filter-empty" hidden class="mt-14 font-mono text-sm text-muted">
+    0 resultados —
+    <button type="button" id="filter-reset" class="cursor-pointer underline hover:text-accent">
+      limpiar
+    </button>
+  </p>
 </Base>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-filter]');
+  const list = document.getElementById('post-list');
+  if (root && list) {
+    root.hidden = false;
+    const input = root.querySelector('input')!;
+    const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-chip]')];
+    const count = document.getElementById('filter-count')!;
+    const empty = document.getElementById('filter-empty');
+    const items = [...list.querySelectorAll<HTMLElement>('[data-post]')];
+    const active = new Set<string>();
+
+    // Sin acentos ni mayúsculas: "bitacora" encuentra "Bitácora".
+    const norm = (s: string) =>
+      s
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
+    const apply = () => {
+      const query = norm(input.value.trim());
+      let shown = 0;
+      for (const item of items) {
+        const text = norm(item.dataset.post ?? '');
+        const tags = (item.dataset.tags ?? '').split(' ');
+        const visible =
+          (!query || text.includes(query)) && [...active].every((tag) => tags.includes(tag));
+        item.hidden = !visible;
+        if (visible) shown += 1;
+      }
+      count.textContent = `${shown}/${items.length}`;
+      if (empty) empty.hidden = shown > 0;
+    };
+
+    input.addEventListener('input', apply);
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        const tag = chip.dataset.chip ?? '';
+        if (active.has(tag)) {
+          active.delete(tag);
+        } else {
+          active.add(tag);
+        }
+        chip.setAttribute('aria-pressed', String(active.has(tag)));
+        apply();
+      });
+    }
+    document.getElementById('filter-reset')?.addEventListener('click', () => {
+      input.value = '';
+      active.clear();
+      for (const chip of chips) chip.setAttribute('aria-pressed', 'false');
+      apply();
+    });
+  }
+</script>

@@ -1,0 +1,17 @@
+---
+// Riel decorativo lateral: columna sticky centrada en el viewport que flanquea
+// el contenido. Puramente ornamental — oculto para lectores de pantalla y sin
+// selección. El arte vive en src/ascii/rails.ts; si está vacío se muestra un
+// marcador de posición.
+interface Props {
+  art: string;
+  align: 'left' | 'right';
+}
+
+const { art, align } = Astro.props;
+const hasArt = art.trim().length > 0;
+---
+
+<div class:list={['rail', align === 'left' ? 'rail-left' : 'rail-right']} aria-hidden="true">
+  {hasArt ? <pre class="rail-art">{art}</pre> : <div class="rail-placeholder"></div>}
+</div>
