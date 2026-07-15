@@ -19,6 +19,8 @@ const {
 const pageTitle = title ? `${title} — ${SITE.title}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const isHome = Astro.url.pathname === '/';
+// El footer es una modeline de editor: ruta real a la izquierda, firma a la derecha.
+const modelinePath = `~${Astro.url.pathname}`;
 ---
 
 <html lang="es">
@@ -61,11 +63,9 @@ const isHome = Astro.url.pathname === '/';
         <main class="py-12">
           <slot />
         </main>
-        <footer
-          class="flex items-baseline justify-between border-t border-line pt-5 font-mono text-xs text-muted"
-        >
-          <span>© {new Date().getFullYear()} {SITE.author}</span>
-          <span>texto plano</span>
+        <footer class="modeline">
+          <span class="modeline-path">{modelinePath}</span>
+          <span>© {new Date().getFullYear()} {SITE.author} · texto plano</span>
         </footer>
       </div>
       <div class="hidden lg:block"><slot name="rail-right" /></div>

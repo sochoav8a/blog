@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="1200" viewBox="0 0 400 1200">
+  <!-- Fuente del riel derecho: cohete en silueta.
+       Pensado para modo edges: rellenos planos, el sobel dibuja el contorno. -->
+  <rect width="400" height="1200" fill="#fff"/>
+  <g fill="#141414">
+    <path d="M200 70
+             C 262 150, 268 240, 268 340
+             L 268 720
+             C 268 746, 248 762, 200 762
+             C 152 762, 132 746, 132 720
+             L 132 340
+             C 132 240, 138 150, 200 70 Z"/>
+    <path d="M132 570 L66 784 L132 744 Z"/>
+    <path d="M268 570 L334 784 L268 744 Z"/>
+    <path d="M170 762 L230 762 L246 818 L154 818 Z"/>
+  </g>
+  <circle cx="200" cy="330" r="44" fill="#fff"/>
+  <path d="M200 852 C 240 902, 234 960, 200 1032 C 166 960, 160 902, 200 852 Z" fill="#3c3c3c"/>
+  <g fill="#1e1e1e">
+    <circle cx="176" cy="1086" r="18"/>
+    <circle cx="228" cy="1124" r="15"/>
+    <circle cx="200" cy="1168" r="12"/>
+  </g>
+  <!-- líneas de velocidad -->
+  <g stroke="#222" stroke-width="14" stroke-linecap="round">
+    <path d="M84 300 L84 390"/>
+    <path d="M316 210 L316 300"/>
+    <path d="M76 900 L76 990"/>
+    <path d="M324 950 L324 1040"/>
+  </g>
+</svg>

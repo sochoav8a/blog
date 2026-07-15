@@ -22,8 +22,8 @@ const { posts } = Astro.props;
 ---
 
 <Base title={`#${tag}`} description={`Posts etiquetados con #${tag}`}>
-  <AsciiRail slot="rail-left" art={railLeft} align="left" />
-  <AsciiRail slot="rail-right" art={railRight} align="right" />
+  <AsciiRail slot="rail-left" rail={railLeft} align="left" />
+  <AsciiRail slot="rail-right" rail={railRight} align="right" />
 
   <h1 class="text-lg font-bold text-accent">#{tag}</h1>
   <ul class="mt-10 flex flex-col gap-5">
@@ -36,7 +36,7 @@ const { posts } = Astro.props;
           >
             {formatDate(post.data.date)}
           </time>
-          <a href={`/posts/${post.id}/`} class="no-underline hover:text-accent">
+          <a href={`/posts/${post.id}/`} class="post-link no-underline hover:text-accent">
             {post.data.title}
           </a>
         </li>

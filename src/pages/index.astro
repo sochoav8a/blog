@@ -28,20 +28,24 @@ const asciiLines = [
 const widthSantiago = Math.max(...santiagoLines.map((line) => line.length));
 const widthAscii = Math.max(...asciiLines.map((line) => line.length));
 const pad = ' '.repeat(Math.max(0, widthSantiago - widthAscii));
-const mastheadSantiago = santiagoLines.join('\n');
-const mastheadAscii = asciiLines.map((line) => pad + line).join('\n');
+// Una línea = un span en bloque: así cada una puede "imprimirse" escalonada
+// (animación .masthead-line; --i marca el turno).
+const mastheadLines = [
+  ...santiagoLines.map((line) => ({ line, accent: false })),
+  ...asciiLines.map((line) => ({ line: pad + line, accent: true })),
+];
 ---
 
 <Base>
-  <AsciiRail slot="rail-left" art={railLeft} align="left" />
-  <AsciiRail slot="rail-right" art={railRight} align="right" />
+  <AsciiRail slot="rail-left" rail={railLeft} align="left" />
+  <AsciiRail slot="rail-right" rail={railRight} align="right" />
 
   <h1 class="sr-only">{SITE.title}</h1>
   <pre
     class="masthead"
     role="img"
-    aria-label={SITE.title}>{mastheadSantiago + '\n'}<span class="text-accent">{mastheadAscii}</span></pre>
-  <p class="mt-6 font-mono text-sm text-muted">
+    aria-label={SITE.title}>{mastheadLines.map(({ line, accent }, i) => <span class:list={['masthead-line', accent && 'text-accent']} style={`--i: ${i}`}>{line}</span>)}</pre>
+  <p class="masthead-tagline mt-6 font-mono text-sm text-muted">
     {SITE.description.toLowerCase().replace(/\.$/, '')}
     <span class="cursor" aria-hidden="true"></span>
   </p>
@@ -92,7 +96,7 @@ const mastheadAscii = asciiLines.map((line) => pad + line).join('\n');
             {formatDate(post.data.date)}
           </time>
           <h2 class="mt-1 text-lg font-bold">
-            <a href={`/posts/${post.id}/`} class="no-underline hover:text-accent">
+            <a href={`/posts/${post.id}/`} class="post-link no-underline hover:text-accent">
               {post.data.title}
             </a>
           </h2>

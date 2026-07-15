@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="1200" viewBox="0 0 400 1200">
+  <!-- Fuente del riel izquierdo: planeta anillado, luna y cometa.
+       Pensado para modo ramp: esfera con degradado, anillos con trazo. -->
+  <defs>
+    <radialGradient id="esfera" cx="0.35" cy="0.3" r="0.95">
+      <stop offset="0" stop-color="#ececec"/>
+      <stop offset="0.55" stop-color="#7d7d7d"/>
+      <stop offset="1" stop-color="#141414"/>
+    </radialGradient>
+    <radialGradient id="luna" cx="0.4" cy="0.35" r="0.9">
+      <stop offset="0" stop-color="#e0e0e0"/>
+      <stop offset="1" stop-color="#2e2e2e"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="1200" fill="#fff"/>
+  <g fill="#1c1c1c">
+    <circle cx="64" cy="80" r="10"/>
+    <circle cx="330" cy="140" r="8"/>
+    <circle cx="128" cy="188" r="7"/>
+    <circle cx="352" cy="620" r="8"/>
+    <circle cx="70" cy="680" r="10"/>
+    <circle cx="160" cy="880" r="7"/>
+    <circle cx="330" cy="930" r="8"/>
+    <circle cx="90" cy="1130" r="9"/>
+    <circle cx="300" cy="1160" r="7"/>
+  </g>
+  <g transform="rotate(-18 200 400)">
+    <circle cx="200" cy="400" r="128" fill="url(#esfera)"/>
+    <g fill="none" stroke="#101010">
+      <ellipse cx="200" cy="400" rx="192" ry="42" stroke-width="11"/>
+      <ellipse cx="200" cy="400" rx="226" ry="54" stroke-width="6"/>
+    </g>
+  </g>
+  <circle cx="282" cy="770" r="50" fill="url(#luna)"/>
+  <g stroke-linecap="round">
+    <circle cx="118" cy="1010" r="22" fill="#1e1e1e"/>
+    <path d="M136 994 L280 926" stroke="#3a3a3a" stroke-width="13" fill="none"/>
+    <path d="M140 1018 L302 962" stroke="#5c5c5c" stroke-width="9" fill="none"/>
+  </g>
+</svg>

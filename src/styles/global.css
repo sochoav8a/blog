@@ -109,6 +109,42 @@
   overflow-x: auto;
 }
 
+/* Cada línea del masthead se "imprime" de izquierda a derecha, escalonada
+ * (--i la pone la página). steps() da el avance mecánico del carro. */
+.masthead-line {
+  display: block;
+  animation: print-line 0.32s steps(24, end) both;
+  animation-delay: calc(var(--i, 0) * 75ms);
+}
+
+@keyframes print-line {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 -2% 0 0);
+  }
+}
+
+/* La bajada espera a que termine de imprimirse el masthead. */
+.masthead-tagline {
+  animation: fade-in 0.5s ease-out both;
+  animation-delay: 1s;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .masthead-line,
+  .masthead-tagline {
+    animation: none;
+  }
+}
+
 .cursor {
   display: inline-block;
   width: 0.55em;
@@ -151,6 +187,14 @@
   justify-content: flex-start;
 }
 
+.rail-fig {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
 .rail-art {
   /* Escala con el viewport: legible en una portátil de 1280–1366px
    * sin robarle sitio a la columna de lectura. */
@@ -158,11 +202,38 @@
   line-height: 1.3;
   color: var(--color-line);
   white-space: pre;
-  max-height: 100%;
+  min-height: 0;
   overflow: hidden;
   /* Si el arte es más alto que el viewport, se desvanece en los bordes
    * en vez de cortarse en seco. */
   mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+/* Trama fina para fotos (~64 columnas): letra menor, el ojo funde los
+ * caracteres en un medio tono, como un grabado. Mismo line-height que
+ * .rail-art: el generador asume esa proporción de celda (CHAR_ASPECT).
+ * La pareja duotono sube un escalón (muted/tinta): a este tamaño el verde
+ * línea no da suficiente cuerpo para cargar el tono de una foto. */
+.rail-art-fine {
+  font-size: clamp(0.36rem, 0.5vw, 0.55rem);
+  color: var(--color-muted);
+}
+
+/* Duotono del generador (pnpm ascii): las rachas oscuras van en tinta. */
+.rail-art .k {
+  color: var(--color-muted);
+}
+
+.rail-art-fine .k {
+  color: var(--color-ink);
+}
+
+/* Pie de figura, estilo lámina: fig. 01 · planeta */
+.rail-cap {
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
 }
 
 /* Marcador mientras no hay arte: una columna punteada que señala el hueco. */
@@ -170,6 +241,58 @@
   width: 7rem;
   height: min(60dvh, 26rem);
   border: 1px dashed var(--color-line);
+}
+
+/* --- Listados de posts: el prompt > acompaña al título activo --- */
+
+.post-link {
+  position: relative;
+}
+
+.post-link::before {
+  content: '>';
+  position: absolute;
+  left: -1.15em;
+  color: var(--color-accent);
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(-0.25em);
+  transition:
+    opacity 120ms ease-out,
+    transform 120ms ease-out;
+}
+
+.post-link:hover::before,
+.post-link:focus-visible::before {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-link::before {
+    transition: none;
+  }
+}
+
+/* --- Footer modeline: barra de estado de editor, con la ruta real --- */
+
+.modeline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  color: var(--color-muted);
+  background-color: var(--color-wash);
+  border: 1px solid var(--color-line);
+  padding: 0.3rem 0.8rem;
+}
+
+.modeline-path {
+  font-weight: 700;
+  color: var(--color-ink);
 }
 
 /* --- Chips de tags del buscador (portada) --- */
