@@ -27,8 +27,8 @@
 
 /*
  * Tokens del sitio. Concepto: página mecanografiada sobre papel de color —
- * pastel sobrio (papel verde suave), acentos fuertes (azul hipervínculo,
- * salmón de subrayador), una sola fuente de máquina de escribir.
+ * azul glaciar: papel azul hielo y una sola familia fría; el acento azul
+ * eléctrico manda, el subrayador es celeste, el cálido queda para avisos.
  */
 @theme {
   --color-*: initial;
@@ -36,14 +36,14 @@
   --text-*: initial;
 
   /* Colores */
-  --color-paper: #e4eddb;
-  --color-ink: #1f2a21;
-  --color-muted: #566753;
-  --color-line: #c2d3b0;
-  --color-wash: #d9e5cb;
-  --color-accent: #3d5ae0;
-  --color-warm: #d2523f;
-  --color-mark: #f8b4a0;
+  --color-paper: #e2e9f2;
+  --color-ink: #1c2634;
+  --color-muted: #4f6076;
+  --color-line: #bccfe2;
+  --color-wash: #d5e0ec;
+  --color-accent: #2a5ee8;
+  --color-warm: #c25b3f;
+  --color-mark: #bfdcf7;
 
   /* Tipografía */
   --font-mono: "Courier Prime", "Courier New", ui-monospace, monospace;
