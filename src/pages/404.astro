@@ -3,8 +3,18 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base title="404">
-  <p class="font-mono text-sm text-muted">404: archivo no encontrado</p>
-  <p class="mt-4">
-    Esta página no existe. <a href="/">Volver al índice</a>.
-  </p>
+  <div class="corrupt">
+    <div class="save-icon" aria-hidden="true">
+      <div class="tower tower-dead" style="--h: 1.6rem">
+        <i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+    <div>
+      <p class="corrupt-code">404</p>
+      <h1 class="post-title">Datos corruptos</h1>
+      <p class="mt-4 text-muted">
+        Esta página no existe o se dañó en el camino. <a href="/" data-nav>Volver al archivo</a>.
+      </p>
+    </div>
+  </div>
 </Base>

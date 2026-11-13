@@ -42,10 +42,11 @@ export async function GET({ props }: { props: Props }) {
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: '72px 80px',
-        backgroundColor: '#e2e9f2',
-        color: '#1c2634',
+        backgroundColor: '#03040d',
+        backgroundImage: 'radial-gradient(circle at 50% 135%, #2f6bff 0%, #03040d 62%)',
+        color: '#f1f5ff',
         fontFamily: 'Courier Prime',
-        borderLeft: '20px solid #2a5ee8',
+        borderLeft: '20px solid #7aa7ff',
       },
       [
         node(
@@ -53,7 +54,7 @@ export async function GET({ props }: { props: Props }) {
           { fontSize: 58, fontWeight: 700, lineHeight: 1.2, lineClamp: 4 },
           props.title,
         ),
-        node('div', { fontSize: 28, color: '#4f6076' }, props.subtitle),
+        node('div', { fontSize: 28, color: '#8ea4e6' }, props.subtitle),
       ],
     ),
     {

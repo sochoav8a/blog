@@ -18,3 +18,13 @@ export async function getPublishedPosts(): Promise<Post[]> {
 export function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
+
+// Datos de "archivo" de un post: palabras, minutos de lectura y un tamaño
+// legible (bytes del markdown), para las fichas del listado y del post.
+export function postStats(post: Post): { words: number; minutes: number; size: string } {
+  const body = post.body ?? '';
+  const words = body.split(/\s+/).filter(Boolean).length;
+  const bytes = new TextEncoder().encode(body).length;
+  const size = bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
+  return { words, minutes: Math.max(1, Math.round(words / 220)), size };
+}

@@ -1,0 +1,16 @@
+---
+// Lámina ASCII: una pieza generada con `pnpm ascii` (ver src/ascii/rails.ts)
+// dentro de un panel, con su pie de figura. Decorativa.
+import type { RailArt } from '../ascii/rails';
+
+interface Props {
+  figure: RailArt;
+}
+
+const { figure } = Astro.props;
+---
+
+<figure class="ascii-fig" aria-hidden="true">
+  <pre class:list={['ascii-art', figure.fine && 'ascii-art-fine']} set:html={figure.art} />
+  {figure.label && <figcaption>{figure.label}</figcaption>}
+</figure>

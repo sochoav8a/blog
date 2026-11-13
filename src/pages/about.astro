@@ -1,11 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
+import AsciiFigure from '../components/AsciiFigure.astro';
+import { railLeft, railRight } from '../ascii/rails';
 import { SITE } from '../site';
 ---
 
 <Base title="About" description={`Sobre ${SITE.author} y este sitio`}>
-  <div class="prose">
+  <p class="crumb"><a href="/" data-nav>archivo</a> / about</p>
+  <div class="section-head mt-4">
     <h1>About</h1>
+    <span>perfil</span>
+  </div>
+  <div class="figures mt-8">
+    <AsciiFigure figure={railLeft} />
+    <AsciiFigure figure={railRight} />
+  </div>
+  <div class="prose mt-10">
     <p>
       Soy {SITE.author}. Este blog reúne ensayos y bitácoras de lectura.
     </p>

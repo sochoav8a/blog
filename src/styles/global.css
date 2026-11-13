@@ -1,34 +1,10 @@
 @import "tailwindcss";
 
-/* Courier Prime: máquina de escribir diseñada para leerse en pantalla. */
-@font-face {
-  font-family: "Courier Prime";
-  src: url("/fonts/CourierPrime-400.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Courier Prime";
-  src: url("/fonts/CourierPrime-400i.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Courier Prime";
-  src: url("/fonts/CourierPrime-700.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /*
- * Tokens del sitio. Concepto: página mecanografiada sobre papel de color —
- * azul glaciar: papel azul hielo y una sola familia fría; el acento azul
- * eléctrico manda, el subrayador es celeste, el cálido queda para avisos.
+ * Tokens del sitio. Concepto: el menú de sistema de una consola de 2000 —
+ * negro azulado, niebla que sube desde abajo, paneles de vidrio, torres
+ * translúcidas y texto fino con resplandor. Una sola familia fría; el rojo
+ * queda para avisos. Las fuentes llegan por @fontsource (ver Base.astro).
  */
 @theme {
   --color-*: initial;
@@ -36,44 +12,51 @@
   --text-*: initial;
 
   /* Colores */
-  --color-paper: #e2e9f2;
-  --color-ink: #1c2634;
-  --color-muted: #4f6076;
-  --color-line: #bccfe2;
-  --color-wash: #d5e0ec;
-  --color-accent: #2a5ee8;
-  --color-warm: #c25b3f;
-  --color-mark: #bfdcf7;
+  --color-paper: #03040d;
+  --color-ink: #dbe4ff;
+  --color-muted: #8493c9;
+  --color-line: #232f6e;
+  --color-wash: #0a1033;
+  --color-accent: #7aa7ff;
+  --color-deep: #2f6bff;
+  --color-warm: #ff5c6c;
+  --color-mark: #2444c4;
 
   /* Tipografía */
-  --font-mono: "Courier Prime", "Courier New", ui-monospace, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Courier New", monospace;
+  --font-display: "Michroma", "Eurostile", "Arial Narrow", sans-serif;
 
-  /* Escala (base 17px) */
+  /* Escala (base 16px) */
   --text-xs: 0.72rem;
   --text-xs--line-height: 1.6;
-  --text-sm: 0.82rem;
+  --text-sm: 0.84rem;
   --text-sm--line-height: 1.65;
   --text-base: 1rem;
-  --text-base--line-height: 1.75;
-  --text-lg: 1.18rem;
+  --text-base--line-height: 1.8;
+  --text-lg: 1.15rem;
   --text-lg--line-height: 1.55;
-  --text-xl: 1.42rem;
-  --text-xl--line-height: 1.3;
+  --text-xl: 1.4rem;
+  --text-xl--line-height: 1.35;
   --text-2xl: 1.7rem;
-  --text-2xl--line-height: 1.25;
-  --text-3xl: 2.05rem;
-  --text-3xl--line-height: 1.15;
+  --text-2xl--line-height: 1.3;
 }
 
-/* En @layer base para que las utilidades de Tailwind (p. ej. no-underline)
- * puedan pisar estos defaults; los estilos sin capa les ganarían siempre. */
 @layer base {
   html {
-    font-size: 17px;
+    font-size: 16px;
+    color-scheme: dark;
+    /* Resplandor que sube desde el fondo de la pantalla + viñeta arriba.
+     * Va en html (no en body) para que el canvas de niebla, con z-index
+     * negativo, quede por encima del fondo. */
+    background:
+      radial-gradient(120% 70% at 50% 118%, rgb(47 107 255 / 0.42), transparent 62%),
+      radial-gradient(90% 50% at 50% -20%, rgb(30 50 160 / 0.28), transparent 70%),
+      var(--color-paper);
+    background-attachment: fixed;
   }
 
   body {
-    background-color: var(--color-paper);
+    min-height: 100dvh;
     color: var(--color-ink);
     font-family: var(--font-mono);
     font-size: var(--text-base);
@@ -82,12 +65,12 @@
 
   ::selection {
     background-color: var(--color-mark);
-    color: var(--color-ink);
+    color: #fff;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+    outline: 1px solid var(--color-accent);
+    outline-offset: 3px;
   }
 
   a {
@@ -97,52 +80,172 @@
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
   }
+
+  a:hover {
+    color: var(--color-accent);
+  }
 }
 
-/* --- Masthead ASCII (portada) --- */
+/* --- Fondo y estructura --- */
+
+#fog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.shell {
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 2.5rem;
+}
+
+/* --- Barra superior: marca en display ancho + reloj del sistema --- */
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, var(--color-accent), transparent 85%) 1;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-ink);
+  text-shadow: 0 0 14px rgb(122 167 255 / 0.7);
+}
+
+.topnav {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  font-size: var(--text-sm);
+}
+
+.topnav a {
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.topnav a:hover,
+.topnav a[aria-current='page'] {
+  color: var(--color-ink);
+  text-shadow: 0 0 10px rgb(122 167 255 / 0.9);
+}
+
+.clock {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 30rem) {
+  .clock {
+    display: none;
+  }
+}
+
+/* --- Leyenda inferior: ruta + controles --- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 1.25rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  color: var(--color-muted);
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent 15%, var(--color-accent)) 1;
+}
+
+.legend-path {
+  color: var(--color-ink);
+}
+
+.legend-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.legend kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.45em;
+  height: 1.45em;
+  margin-right: 0.3em;
+  font-family: inherit;
+  font-size: 0.95em;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgb(122 167 255 / 0.45);
+}
+
+/* Los atajos son de teclado: sin teclado, la leyenda sobra. */
+@media (hover: none) {
+  .legend-keys {
+    display: none;
+  }
+}
+
+/* --- Masthead ASCII (portada): figlet con luz de consola --- */
 
 .masthead {
-  font-size: clamp(0.6rem, 2.6vw, 1rem);
-  font-weight: 700;
+  font-size: clamp(0.56rem, 2.55vw, 1rem);
+  font-weight: 600;
   line-height: 1.15;
   white-space: pre;
-  overflow-x: auto;
+  overflow: auto hidden;
+  scrollbar-width: none;
+  padding: 0.6em 0;
+  color: #f1f5ff;
+  text-shadow:
+    0 0 6px rgb(160 195 255 / 0.85),
+    0 0 26px rgb(47 107 255 / 0.9);
 }
 
-/* Cada línea del masthead se "imprime" de izquierda a derecha, escalonada
- * (--i la pone la página). steps() da el avance mecánico del carro. */
+.masthead-accent {
+  color: var(--color-accent);
+}
+
+/* Cada línea se materializa desde la niebla, escalonada (--i). */
 .masthead-line {
   display: block;
-  animation: print-line 0.32s steps(24, end) both;
-  animation-delay: calc(var(--i, 0) * 75ms);
+  animation: emerge 0.9s ease-out both;
+  animation-delay: calc(var(--i, 0) * 70ms);
 }
 
-@keyframes print-line {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 -2% 0 0);
-  }
-}
-
-/* La bajada espera a que termine de imprimirse el masthead. */
-.masthead-tagline {
-  animation: fade-in 0.5s ease-out both;
-  animation-delay: 1s;
-}
-
-@keyframes fade-in {
+@keyframes emerge {
   from {
     opacity: 0;
+    filter: blur(6px);
+    transform: translateY(0.4em);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .masthead-line,
-  .masthead-tagline {
-    animation: none;
-  }
+.masthead-tagline {
+  margin-top: 1.5rem;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  animation: emerge 0.8s ease-out both;
+  animation-delay: 0.9s;
 }
 
 .cursor {
@@ -151,6 +254,7 @@
   height: 1em;
   vertical-align: text-bottom;
   background-color: var(--color-accent);
+  box-shadow: 0 0 10px var(--color-accent);
   animation: blink 1.2s steps(1) infinite;
 }
 
@@ -160,142 +264,90 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cursor {
-    animation: none;
-  }
-}
+/* --- Encabezado de sección: título en display + contador --- */
 
-/* --- Rieles ASCII laterales (AsciiRail; el arte va en src/ascii/rails.ts) --- */
-
-.rail {
-  position: sticky;
-  top: 0;
-  height: 100dvh;
+.section-head {
   display: flex;
-  align-items: center;
-  padding: 0 clamp(1rem, 2.5vw, 4rem);
-  overflow: hidden;
-  user-select: none;
-}
-
-.rail-left {
-  justify-content: flex-end;
-}
-
-.rail-right {
-  justify-content: flex-start;
-}
-
-.rail-fig {
-  max-height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.rail-art {
-  /* Escala con el viewport: legible en una portátil de 1280–1366px
-   * sin robarle sitio a la columna de lectura. */
-  font-size: clamp(0.55rem, 0.9vw, 0.8rem);
-  line-height: 1.3;
-  color: var(--color-line);
-  white-space: pre;
-  min-height: 0;
-  overflow: hidden;
-  /* Si el arte es más alto que el viewport, se desvanece en los bordes
-   * en vez de cortarse en seco. */
-  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-}
-
-/* Trama fina para fotos (~64 columnas): letra menor, el ojo funde los
- * caracteres en un medio tono, como un grabado. Mismo line-height que
- * .rail-art: el generador asume esa proporción de celda (CHAR_ASPECT).
- * La pareja duotono sube un escalón (muted/tinta): a este tamaño el verde
- * línea no da suficiente cuerpo para cargar el tono de una foto. */
-.rail-art-fine {
-  font-size: clamp(0.36rem, 0.5vw, 0.55rem);
-  color: var(--color-muted);
-}
-
-/* Duotono del generador (pnpm ascii): las rachas oscuras van en tinta. */
-.rail-art .k {
-  color: var(--color-muted);
-}
-
-.rail-art-fine .k {
-  color: var(--color-ink);
-}
-
-/* Pie de figura, estilo lámina: fig. 01 · planeta */
-.rail-cap {
-  font-size: var(--text-xs);
-  line-height: var(--text-xs--line-height);
-  letter-spacing: 0.08em;
-  color: var(--color-muted);
-}
-
-/* Marcador mientras no hay arte: una columna punteada que señala el hueco. */
-.rail-placeholder {
-  width: 7rem;
-  height: min(60dvh, 26rem);
-  border: 1px dashed var(--color-line);
-}
-
-/* --- Listados de posts: el prompt > acompaña al título activo --- */
-
-.post-link {
-  position: relative;
-}
-
-.post-link::before {
-  content: '>';
-  position: absolute;
-  left: -1.15em;
-  color: var(--color-accent);
-  font-weight: 700;
-  opacity: 0;
-  transform: translateX(-0.25em);
-  transition:
-    opacity 120ms ease-out,
-    transform 120ms ease-out;
-}
-
-.post-link:hover::before,
-.post-link:focus-visible::before {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .post-link::before {
-    transition: none;
-  }
-}
-
-/* --- Footer modeline: barra de estado de editor, con la ruta real --- */
-
-.modeline {
-  display: flex;
-  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.25rem 1rem;
-  font-family: var(--font-mono);
+  gap: 1rem;
+}
+
+.section-head h1,
+.section-head h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: #f1f5ff;
+  text-shadow: 0 0 18px rgb(47 107 255 / 0.9);
+}
+
+.section-head span {
   font-size: var(--text-xs);
-  line-height: var(--text-xs--line-height);
   color: var(--color-muted);
-  background-color: var(--color-wash);
-  border: 1px solid var(--color-line);
-  padding: 0.3rem 0.8rem;
 }
 
-.modeline-path {
-  font-weight: 700;
-  color: var(--color-ink);
+.crumb {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
 }
 
-/* --- Chips de tags del buscador (portada) --- */
+.crumb a {
+  text-decoration: none;
+  color: var(--color-accent);
+}
+
+/* --- Panel de vidrio (base compartida) --- */
+
+.save,
+.search,
+.fileinfo,
+.ascii-fig,
+.prose pre,
+.prose .callout {
+  background: linear-gradient(160deg, rgb(70 105 255 / 0.13), rgb(14 22 70 / 0.22));
+  border: 1px solid rgb(122 167 255 / 0.2);
+  backdrop-filter: blur(5px);
+}
+
+/* --- Buscador --- */
+
+.search {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.55rem 1rem;
+  font-size: var(--text-sm);
+}
+
+.search:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 18px rgb(47 107 255 / 0.35);
+}
+
+.search > span:first-child {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  outline: none;
+  caret-color: var(--color-accent);
+}
+
+.search input::placeholder {
+  color: var(--color-muted);
+}
+
+.search-count {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
 
 .chip {
   font-family: var(--font-mono);
@@ -304,7 +356,8 @@
   color: var(--color-muted);
   background: none;
   border: 1px solid var(--color-line);
-  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  padding: 0.1rem 0.7rem;
   cursor: pointer;
 }
 
@@ -314,9 +367,309 @@
 }
 
 .chip[aria-pressed='true'] {
-  color: var(--color-paper);
-  background-color: var(--color-accent);
+  color: #fff;
+  background-color: var(--color-deep);
   border-color: var(--color-accent);
+  box-shadow: 0 0 14px rgb(47 107 255 / 0.6);
+}
+
+/* --- Listado: navegador de datos guardados --- */
+
+.saves {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.save {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem 1rem 0.9rem;
+  transition:
+    border-color 160ms ease-out,
+    box-shadow 160ms ease-out,
+    transform 160ms ease-out;
+}
+
+/* Elemento seleccionado: borde encendido y título que late, como el cursor
+ * de un menú de consola. */
+.save:hover,
+.save:focus-within {
+  border-color: rgb(160 195 255 / 0.75);
+  box-shadow:
+    0 0 0 1px rgb(122 167 255 / 0.25),
+    0 0 34px rgb(47 107 255 / 0.4);
+  transform: translateX(4px);
+}
+
+.save-title {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  font-weight: 600;
+}
+
+.save-title a {
+  text-decoration: none;
+  outline: none;
+}
+
+/* Toda la tarjeta es clicable sin anidar enlaces. */
+.save-title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.save:hover .save-title a,
+.save:focus-within .save-title a {
+  animation: selected 1.4s ease-in-out infinite;
+}
+
+@keyframes selected {
+  0%,
+  100% {
+    color: #fff;
+    text-shadow: 0 0 14px rgb(122 167 255 / 0.95);
+  }
+  50% {
+    color: var(--color-accent);
+    text-shadow: 0 0 4px rgb(122 167 255 / 0.3);
+  }
+}
+
+.save-desc {
+  margin-top: 0.15rem;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  color: var(--color-muted);
+}
+
+.save-meta {
+  position: relative; /* por encima del ::after de la tarjeta */
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.9rem;
+  margin-top: 0.45rem;
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.save-meta a {
+  pointer-events: auto;
+  text-decoration: none;
+  color: var(--color-accent);
+}
+
+.save-meta a:hover {
+  color: #fff;
+}
+
+/* --- Torre 3D: prisma translúcido que gira; --h viene de la longitud del post --- */
+
+.save-icon {
+  display: grid;
+  place-items: center;
+  height: 3.4rem;
+  perspective: 16rem;
+}
+
+.tower {
+  --w: 1.15rem;
+  --h: 1.4rem;
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  transform-style: preserve-3d;
+  animation: tower-spin 16s linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.save:hover .tower,
+.save:focus-within .tower {
+  animation-duration: 3.5s;
+}
+
+.tower i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--w);
+  height: var(--h);
+  background: linear-gradient(to top, rgb(47 107 255 / 0.5), rgb(190 215 255 / 0.28));
+  border: 1px solid rgb(200 222 255 / 0.85);
+  box-shadow: 0 0 10px rgb(47 107 255 / 0.55);
+}
+
+.tower i:nth-child(1) {
+  transform: translateZ(calc(var(--w) / 2));
+}
+.tower i:nth-child(2) {
+  transform: rotateY(90deg) translateZ(calc(var(--w) / 2));
+}
+.tower i:nth-child(3) {
+  transform: rotateY(180deg) translateZ(calc(var(--w) / 2));
+}
+.tower i:nth-child(4) {
+  transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+}
+.tower i:nth-child(5) {
+  height: var(--w);
+  background: rgb(215 230 255 / 0.5);
+  transform: rotateX(90deg) translateZ(calc(var(--w) / 2));
+}
+.tower i:nth-child(6) {
+  height: var(--w);
+  top: auto;
+  bottom: 0;
+  background: rgb(47 107 255 / 0.35);
+  transform: rotateX(-90deg) translateZ(calc(var(--w) / 2));
+}
+
+@keyframes tower-spin {
+  from {
+    transform: rotateX(-22deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(-22deg) rotateY(360deg);
+  }
+}
+
+/* Datos corruptos: la torre gris del 404. */
+.tower-dead i {
+  background: rgb(140 145 165 / 0.25);
+  border-color: rgb(170 175 195 / 0.7);
+  box-shadow: none;
+}
+
+.corrupt {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  padding: 3rem 0;
+}
+
+.corrupt-code {
+  font-size: var(--text-xs);
+  letter-spacing: 0.3em;
+  color: var(--color-warm);
+}
+
+/* --- Post: cabecera y ficha de archivo --- */
+
+.post-title {
+  margin-top: 1rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 4.6vw, 1.75rem);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
+  color: #f4f7ff;
+  text-shadow: 0 0 22px rgb(47 107 255 / 0.85);
+  text-wrap: balance;
+}
+
+.post-desc {
+  margin-top: 1rem;
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  font-style: italic;
+  color: var(--color-muted);
+}
+
+.fileinfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.75rem;
+  padding: 0.9rem 1.25rem;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+.fileinfo dt {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.fileinfo a {
+  text-decoration: none;
+  color: var(--color-accent);
+}
+
+.eof {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 4rem;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.eof::before,
+.eof::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-line));
+}
+
+.eof::after {
+  transform: scaleX(-1);
+}
+
+/* --- Láminas ASCII (about) --- */
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ascii-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0.5rem 0.75rem;
+  overflow: hidden;
+  user-select: none;
+}
+
+.ascii-art {
+  font-size: clamp(0.3rem, 1.25vw, 0.55rem);
+  line-height: 1.3;
+  white-space: pre;
+  color: var(--color-deep);
+}
+
+.ascii-art-fine {
+  font-size: clamp(0.2rem, 1.1vw, 0.5rem);
+}
+
+/* Duotono del generador (pnpm ascii): las rachas oscuras de la imagen son
+ * aquí las más luminosas — el retrato se lee como un negativo encendido. */
+.ascii-art .k {
+  color: #cfe0ff;
+  text-shadow: 0 0 6px rgb(122 167 255 / 0.6);
+}
+
+.ascii-fig figcaption {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
 }
 
 /*
@@ -329,21 +682,32 @@
 
 .prose h1,
 .prose h2 {
-  font-weight: 700;
-  font-size: var(--text-lg);
-  line-height: var(--text-lg--line-height);
-  margin-top: 2.2em;
-  margin-bottom: 0.6em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  letter-spacing: 0.1em;
+  color: #f1f5ff;
+  text-shadow: 0 0 16px rgb(47 107 255 / 0.8);
+  margin-top: 2.6em;
+  margin-bottom: 0.9em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, var(--color-accent), transparent 70%) 1;
 }
 
 .prose h3,
 .prose h4 {
-  font-style: italic;
-  font-weight: 400;
-  font-size: var(--text-lg);
-  line-height: var(--text-lg--line-height);
-  margin-top: 1.8em;
+  font-weight: 600;
+  font-size: var(--text-base);
+  color: var(--color-accent);
+  margin-top: 2em;
   margin-bottom: 0.5em;
+}
+
+.prose h3::before,
+.prose h4::before {
+  content: '▸ ';
 }
 
 .prose p {
@@ -351,20 +715,28 @@
   margin-bottom: 1em;
 }
 
+.prose strong {
+  font-weight: 600;
+  color: #fff;
+}
+
 .prose a {
   color: var(--color-accent);
-  text-decoration-color: currentColor;
+  text-decoration-color: rgb(122 167 255 / 0.5);
 }
 
 .prose a:hover {
-  background-color: var(--color-mark);
+  color: #fff;
+  text-shadow: 0 0 10px rgb(122 167 255 / 0.9);
 }
 
 .prose blockquote {
-  border-left: 2px solid var(--color-warm);
+  border-left: 2px solid var(--color-accent);
+  box-shadow: -8px 0 16px -10px var(--color-deep);
   padding-left: 1.25rem;
   font-style: italic;
-  margin: 1.5em 0;
+  color: #eef3ff;
+  margin: 1.75em 0;
 }
 
 .prose ul,
@@ -374,7 +746,7 @@
 }
 
 .prose ul {
-  list-style: disc;
+  list-style: square;
 }
 
 .prose ol {
@@ -385,19 +757,24 @@
   margin: 0.35em 0;
 }
 
+.prose li::marker {
+  color: var(--color-accent);
+}
+
 .prose code {
   font-size: 0.9em;
-  background-color: var(--color-wash);
+  background-color: rgb(70 105 255 / 0.18);
   padding: 0.1em 0.35em;
+  border-radius: 2px;
 }
 
 .prose pre {
+  /* Astro (Shiki) pinta su propio fondo en línea; aquí manda el panel. */
+  background: linear-gradient(160deg, rgb(70 105 255 / 0.13), rgb(14 22 70 / 0.22)) !important;
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
   overflow-x: auto;
   padding: 1rem 1.25rem;
-  background-color: var(--color-wash);
-  border: 1px solid var(--color-line);
   margin: 1.5em 0;
 }
 
@@ -410,22 +787,27 @@
 .prose img {
   max-width: 100%;
   height: auto;
-  margin: 1.5em 0;
-  border: 1px solid var(--color-line);
+  margin: 1.75em 0;
+  border: 1px solid rgb(122 167 255 / 0.35);
+  box-shadow: 0 0 40px rgb(47 107 255 / 0.25);
 }
 
-/* Separador de escena: * * * en vez de línea. */
+/* Separador de escena: una línea de luz con un rombo. */
 .prose hr {
   border: none;
-  margin: 2.5em 0;
+  margin: 2.75em 0;
   text-align: center;
+  line-height: 1;
+  background: linear-gradient(90deg, transparent, var(--color-line), transparent) center / 100% 1px
+    no-repeat;
 }
 
 .prose hr::before {
-  content: "* * *";
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  letter-spacing: 0.5em;
+  content: '◆';
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  text-shadow: 0 0 10px var(--color-accent);
+  background-color: transparent;
 }
 
 /*
@@ -433,22 +815,44 @@
  * Ganchos por tipo: .callout-note, .callout-warning, .callout-tip, etc.
  */
 .prose .callout {
-  border: 1px solid var(--color-line);
-  border-left: 3px solid var(--color-accent);
+  border-left: 2px solid var(--color-accent);
   padding: 0.75rem 1.25rem;
   margin: 1.5em 0;
-  background-color: var(--color-wash);
 }
 
 .prose .callout-title {
-  font-size: var(--text-xs);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-muted);
+  color: var(--color-accent);
   margin: 0;
 }
 
 .prose .callout-warning {
   border-left-color: var(--color-warm);
+  background: linear-gradient(160deg, rgb(255 92 108 / 0.12), rgb(60 14 30 / 0.2));
+}
+
+.prose .callout-warning .callout-title {
+  color: var(--color-warm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .masthead-line,
+  .masthead-tagline,
+  .cursor,
+  .tower,
+  .save:hover .save-title a,
+  .save:focus-within .save-title a {
+    animation: none;
+  }
+
+  .tower {
+    transform: rotateX(-22deg) rotateY(35deg);
+  }
+
+  .save {
+    transition: none;
+  }
 }

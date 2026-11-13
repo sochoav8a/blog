@@ -1,0 +1,60 @@
+---
+// Listado de posts como "navegador de datos guardados": cada entrada lleva
+// una torre 3D cuya altura crece con la longitud del texto.
+import { formatDate, postStats, type Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<ul id="post-list" class="saves">
+  {
+    posts.map((post, i) => {
+      const stats = postStats(post);
+      // 0.9rem (nota mínima) → 2.6rem (≈1500 palabras o más).
+      const height = 0.9 + Math.min(1, stats.words / 1500) * 1.7;
+      return (
+        <li
+          data-post={[
+            post.data.title,
+            post.data.description,
+            ...post.data.tags.map((tag) => `#${tag}`),
+          ].join(' ')}
+          data-tags={post.data.tags.join(' ')}
+        >
+          <article class="save">
+            <div class="save-icon" aria-hidden="true">
+              <div class="tower" style={`--h: ${height.toFixed(2)}rem; --delay: ${-i * 1.7}s`}>
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+              </div>
+            </div>
+            <div class="min-w-0">
+              <h2 class="save-title">
+                <a href={`/posts/${post.id}/`} data-nav>
+                  {post.data.title}
+                </a>
+              </h2>
+              <p class="save-desc">{post.data.description}</p>
+              <p class="save-meta">
+                <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+                <span>{stats.size}</span>
+                {post.data.draft && <span class="text-warm">draft</span>}
+                {post.data.tags.map((tag) => (
+                  <a href={`/tags/${tag}/`}>#{tag}</a>
+                ))}
+              </p>
+            </div>
+          </article>
+        </li>
+      );
+    })
+  }
+</ul>

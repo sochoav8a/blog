@@ -1,7 +1,7 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { getPublishedPosts, formatDate, type Post } from '../../lib/posts';
+import { getPublishedPosts, formatDate, postStats, type Post } from '../../lib/posts';
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
@@ -14,6 +14,7 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const stats = postStats(post);
 ---
 
 <Base
@@ -24,40 +25,52 @@ const { Content } = await render(post);
 >
   <article>
     <header class="mb-12">
-      <p class="font-mono text-xs text-muted">
-        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+      <p class="crumb"><a href="/" data-nav>archivo</a> / {post.id}</p>
+      <h1 class="post-title">{post.data.title}</h1>
+      <p class="post-desc">{post.data.description}</p>
+      <!-- Ficha del archivo, como la pantalla de datos de una partida guardada. -->
+      <dl class="fileinfo">
+        <div>
+          <dt>Fecha</dt>
+          <dd><time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time></dd>
+        </div>
         {
           post.data.updated && (
-            <>
-              {' · act. '}
-              <time datetime={post.data.updated.toISOString()}>
-                {formatDate(post.data.updated)}
-              </time>
-            </>
+            <div>
+              <dt>Actualizado</dt>
+              <dd>
+                <time datetime={post.data.updated.toISOString()}>
+                  {formatDate(post.data.updated)}
+                </time>
+              </dd>
+            </div>
           )
         }
+        <div>
+          <dt>Tamaño</dt>
+          <dd>{stats.size}</dd>
+        </div>
+        <div>
+          <dt>Lectura</dt>
+          <dd>{stats.minutes} min</dd>
+        </div>
         {
           post.data.tags.length > 0 && (
-            <>
-              {' · '}
-              {post.data.tags.map((tag, i) => (
-                <>
-                  {i > 0 && ' '}
-                  <a href={`/tags/${tag}/`} class="no-underline hover:text-accent">
-                    #{tag}
-                  </a>
-                </>
-              ))}
-            </>
+            <div>
+              <dt>Tags</dt>
+              <dd class="flex flex-wrap gap-x-3">
+                {post.data.tags.map((tag) => (
+                  <a href={`/tags/${tag}/`}>#{tag}</a>
+                ))}
+              </dd>
+            </div>
           )
         }
-      </p>
-      <h1 class="mt-4 text-2xl font-bold">{post.data.title}</h1>
-      <p class="mt-4 text-lg italic text-muted">{post.data.description}</p>
+      </dl>
     </header>
     <div class="prose">
       <Content />
     </div>
-    <p class="mt-16 font-mono text-xs text-muted" aria-hidden="true">EOF</p>
+    <p class="eof" aria-hidden="true"><span>fin de los datos</span></p>
   </article>
 </Base>

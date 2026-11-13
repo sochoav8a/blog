@@ -1,4 +1,4 @@
-// Arte ASCII de los rieles laterales (portada y páginas de tag).
+// Arte ASCII del sitio (láminas de la página about).
 //
 // Flujo: deja la imagen fuente en src/ascii/img/ y corre el generador —
 //   pnpm ascii src/ascii/img/neo.jpeg --width 64 --gamma 2.2

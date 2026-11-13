@@ -1,8 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import AsciiRail from '../components/AsciiRail.astro';
-import { railLeft, railRight } from '../ascii/rails';
-import { getPublishedPosts, formatDate } from '../lib/posts';
+import PostList from '../components/PostList.astro';
+import { getPublishedPosts } from '../lib/posts';
 import { SITE } from '../site';
 
 const posts = await getPublishedPosts();
@@ -37,34 +36,33 @@ const mastheadLines = [
 ---
 
 <Base>
-  <AsciiRail slot="rail-left" rail={railLeft} align="left" />
-  <AsciiRail slot="rail-right" rail={railRight} align="right" />
-
   <h1 class="sr-only">{SITE.title}</h1>
   <pre
     class="masthead"
     role="img"
-    aria-label={SITE.title}>{mastheadLines.map(({ line, accent }, i) => <span class:list={['masthead-line', accent && 'text-accent']} style={`--i: ${i}`}>{line}</span>)}</pre>
-  <p class="masthead-tagline mt-6 font-mono text-sm text-muted">
+    aria-label={SITE.title}>{mastheadLines.map(({ line, accent }, i) => <span class:list={['masthead-line', accent && 'masthead-accent']} style={`--i: ${i}`}>{line}</span>)}</pre>
+  <p class="masthead-tagline">
     {SITE.description.toLowerCase().replace(/\.$/, '')}
     <span class="cursor" aria-hidden="true"></span>
   </p>
 
+  <div class="section-head mt-16">
+    <h2>Archivo</h2>
+    <span>{posts.length} {posts.length === 1 ? 'entrada' : 'entradas'}</span>
+  </div>
+
   <!-- Buscador cliente: filtra el listado por título/descripción/tags.
        Arranca oculto y lo revela el script, así sin JS no hay UI muerta
        (las páginas /tags/ siguen siendo la vía navegable). -->
-  <section data-filter hidden class="mt-14 font-mono" aria-label="Buscar y filtrar posts">
-    <label
-      class="flex items-baseline gap-2 border border-line bg-wash px-4 py-2 focus-within:border-accent"
-    >
-      <span class="font-bold text-accent" aria-hidden="true">&gt;</span>
+  <section data-filter hidden class="mt-6" aria-label="Buscar y filtrar posts">
+    <label class="search">
+      <span aria-hidden="true">&gt;</span>
       <input
         type="search"
         placeholder="buscar…"
         aria-label="Buscar por título, descripción o tag"
-        class="w-full min-w-0 bg-transparent text-sm caret-accent outline-none placeholder:text-muted"
       />
-      <span id="filter-count" class="shrink-0 text-xs text-muted" aria-live="polite"
+      <span id="filter-count" class="search-count" aria-live="polite"
         >{posts.length}/{posts.length}</span
       >
     </label>
@@ -81,41 +79,11 @@ const mastheadLines = [
     }
   </section>
 
-  <ul id="post-list" class="mt-14 flex flex-col gap-10">
-    {
-      posts.map((post) => (
-        <li
-          data-post={[
-            post.data.title,
-            post.data.description,
-            ...post.data.tags.map((tag) => `#${tag}`),
-          ].join(' ')}
-          data-tags={post.data.tags.join(' ')}
-        >
-          <time datetime={post.data.date.toISOString()} class="font-mono text-xs text-muted">
-            {formatDate(post.data.date)}
-          </time>
-          <h2 class="mt-1 text-lg font-bold">
-            <a href={`/posts/${post.id}/`} class="post-link no-underline hover:text-accent">
-              {post.data.title}
-            </a>
-          </h2>
-          <p class="mt-1 text-muted">{post.data.description}</p>
-          {post.data.tags.length > 0 && (
-            <p class="mt-2 flex flex-wrap gap-x-3 font-mono text-xs">
-              {post.data.tags.map((tag) => (
-                <a href={`/tags/${tag}/`} class="text-muted no-underline hover:text-accent">
-                  #{tag}
-                </a>
-              ))}
-            </p>
-          )}
-        </li>
-      ))
-    }
-  </ul>
-  <p id="filter-empty" hidden class="mt-14 font-mono text-sm text-muted">
-    0 resultados —
+  <div class="mt-8">
+    <PostList posts={posts} />
+  </div>
+  <p id="filter-empty" hidden class="mt-10 text-sm text-muted">
+    No hay datos —
     <button type="button" id="filter-reset" class="cursor-pointer underline hover:text-accent">
       limpiar
     </button>

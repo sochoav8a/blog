@@ -1,4 +1,8 @@
 ---
+import '@fontsource/michroma/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-400-italic.css';
+import '@fontsource/ibm-plex-mono/latin-600.css';
 import { SITE } from '../site';
 import '../styles/global.css';
 
@@ -19,20 +23,18 @@ const {
 const pageTitle = title ? `${title} — ${SITE.title}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const isHome = Astro.url.pathname === '/';
-// El footer es una modeline de editor: ruta real a la izquierda, firma a la derecha.
-const modelinePath = `~${Astro.url.pathname}`;
+const path = `~${Astro.url.pathname}`;
 ---
 
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#03040d" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="preload" href="/fonts/CourierPrime-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/CourierPrime-700.woff2" as="font" type="font/woff2" crossorigin />
     <meta property="og:title" content={title ?? SITE.title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
@@ -42,33 +44,204 @@ const modelinePath = `~${Astro.url.pathname}`;
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
-    <!-- Tríptico: riel | columna de lectura | riel. Los rieles (slots opcionales,
-         ver AsciiRail) solo existen desde lg; debajo el centro se comporta como
-         siempre (bloque centrado de 40rem). -->
-    <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_40rem_minmax(0,1fr)]">
-      <div class="hidden lg:block"><slot name="rail-left" /></div>
-      <div class="mx-auto w-full max-w-[40rem] px-5 py-9">
-        <header class="flex items-baseline justify-between font-mono text-sm">
-          {
-            isHome ? (
-              <span class="text-muted">~/{SITE.title}</span>
-            ) : (
-              <a href="/" class="font-bold no-underline hover:text-accent">{SITE.title}</a>
-            )
-          }
-          <nav>
-            <a href="/about" class="text-muted no-underline hover:text-accent">about</a>
-          </nav>
-        </header>
-        <main class="py-12">
-          <slot />
-        </main>
-        <footer class="modeline">
-          <span class="modeline-path">{modelinePath}</span>
-          <span>© {new Date().getFullYear()} {SITE.author} · texto plano</span>
-        </footer>
-      </div>
-      <div class="hidden lg:block"><slot name="rail-right" /></div>
+    <!-- Niebla ASCII: un canvas fijo detrás de todo (ver script al final).
+         Decorativo; sin JS queda el degradado del body y nada más. -->
+    <canvas id="fog" aria-hidden="true"></canvas>
+
+    <div class="shell">
+      <header class="topbar">
+        {
+          isHome ? (
+            <span class="brand">{SITE.title}</span>
+          ) : (
+            <a href="/" class="brand">{SITE.title}</a>
+          )
+        }
+        <nav class="topnav">
+          <a href="/" aria-current={isHome ? 'page' : undefined}>archivo</a>
+          <a href="/about" aria-current={Astro.url.pathname.startsWith('/about') ? 'page' : undefined}
+            >about</a
+          >
+          <time id="clock" class="clock" aria-hidden="true"></time>
+        </nav>
+      </header>
+
+      <main class="py-12">
+        <slot />
+      </main>
+
+      <!-- Leyenda de controles, como la barra inferior de un menú de consola.
+           Los atajos son reales (script abajo). -->
+      <footer class="legend">
+        <span class="legend-path">{path}</span>
+        <span class="legend-keys" aria-hidden="true">
+          <span><kbd>↑</kbd><kbd>↓</kbd> mover</span>
+          <span><kbd>↵</kbd> entrar</span>
+          {!isHome && <span><kbd>⌫</kbd> volver</span>}
+        </span>
+        <span class="legend-sig">© {new Date().getFullYear()} {SITE.author}</span>
+      </footer>
     </div>
+
+    <script>
+      // --- Reloj del menú ---
+      const clock = document.getElementById('clock');
+      if (clock) {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const tick = () => {
+          const d = new Date();
+          clock.textContent = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        };
+        tick();
+        setInterval(tick, 20_000);
+      }
+
+      // --- Navegación con teclado: ↑/↓ recorren los elementos [data-nav],
+      //     ⌫ vuelve al índice. Enter ya funciona solo sobre un enlace enfocado.
+      const typing = (el: EventTarget | null) =>
+        el instanceof HTMLElement && (el.matches('input, textarea, select') || el.isContentEditable);
+
+      document.addEventListener('keydown', (event) => {
+        if (event.metaKey || event.ctrlKey || event.altKey || typing(event.target)) return;
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          const items = [...document.querySelectorAll<HTMLElement>('[data-nav]')].filter(
+            (el) => el.offsetParent !== null,
+          );
+          if (items.length === 0) return;
+          const current = items.indexOf(document.activeElement as HTMLElement);
+          const step = event.key === 'ArrowDown' ? 1 : -1;
+          const next =
+            current === -1
+              ? step === 1
+                ? 0
+                : items.length - 1
+              : Math.min(items.length - 1, Math.max(0, current + step));
+          event.preventDefault();
+          items[next]?.focus();
+          items[next]?.scrollIntoView({ block: 'nearest' });
+        } else if (event.key === 'Backspace' && location.pathname !== '/') {
+          event.preventDefault();
+          location.href = '/';
+        }
+      });
+
+      // --- Niebla ASCII ---
+      // Un campo de senos (barato, sin ruido real) pintado con caracteres en
+      // tonos de azul; siete orbes giran en elipse alrededor de la pantalla.
+      // En el centro, donde va la lectura, la niebla se apaga.
+      const canvas = document.getElementById('fog') as HTMLCanvasElement | null;
+      const ctx = canvas?.getContext('2d');
+      if (canvas && ctx) {
+        const LEVELS = [
+          { ch: '.', color: 'rgba(58, 92, 220, 0.30)' },
+          { ch: ':', color: 'rgba(66, 104, 235, 0.42)' },
+          { ch: '+', color: 'rgba(84, 126, 250, 0.55)' },
+          { ch: '*', color: 'rgba(120, 160, 255, 0.70)' },
+          { ch: '#', color: 'rgba(170, 200, 255, 0.85)' },
+          { ch: '@', color: 'rgba(225, 236, 255, 0.95)' },
+        ];
+        const ORBS = 7;
+        const CELL_H = 17;
+        let cellW = 9;
+        let cols = 0;
+        let rows = 0;
+        let width = 0;
+        let height = 0;
+
+        const resize = () => {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          width = window.innerWidth;
+          height = window.innerHeight;
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.font = '13px "IBM Plex Mono", ui-monospace, monospace';
+          ctx.textBaseline = 'top';
+          cellW = ctx.measureText('M').width || 8;
+          cols = Math.ceil(width / cellW);
+          rows = Math.ceil(height / CELL_H);
+        };
+
+        const smooth = (a: number, b: number, x: number) => {
+          const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+          return t * t * (3 - 2 * t);
+        };
+
+        const draw = (ms: number) => {
+          const t = ms / 1000;
+          ctx.clearRect(0, 0, width, height);
+          const cx = width / 2;
+          const cy = height / 2;
+          const orbs: [number, number][] = [];
+          for (let i = 0; i < ORBS; i++) {
+            const a = t * 0.16 + (i / ORBS) * Math.PI * 2;
+            orbs.push([cx + Math.cos(a) * width * 0.44, cy + Math.sin(a) * height * 0.4]);
+          }
+          // Columna de lectura: ~40rem. Fuera de ella la niebla sube.
+          const quiet = Math.min(370, width * 0.5);
+          const lines: string[][] = LEVELS.map(() => []);
+          for (let y = 0; y < rows; y++) {
+            const py = y * CELL_H;
+            const rowChars: string[][] = LEVELS.map(() => []);
+            for (let x = 0; x < cols; x++) {
+              const px = x * cellW;
+              let v =
+                Math.sin(x * 0.055 + t * 0.19 + Math.sin(y * 0.09 - t * 0.11) * 1.6) +
+                Math.sin(y * 0.14 - t * 0.13) +
+                Math.sin((x + y) * 0.04 + t * 0.07);
+              v = (v + 3) / 6; // 0..1
+              // La niebla sube desde abajo, como el resplandor del fondo.
+              v = Math.pow(v, 1.6) * (0.45 + 0.75 * (py / height));
+              const side = 0.1 + 0.9 * smooth(quiet, quiet + 170, Math.abs(px - cx));
+              v *= side;
+              let orb = 0;
+              for (const [ox, oy] of orbs) {
+                const dx = px - ox;
+                const dy = (py - oy) * 1.15;
+                orb += Math.exp(-(dx * dx + dy * dy) / 1500);
+              }
+              v += orb * Math.max(side, 0.3);
+              const level = Math.min(LEVELS.length, Math.floor(v * 7.5)) - 1;
+              for (let l = 0; l < LEVELS.length; l++) {
+                rowChars[l]!.push(l === level ? LEVELS[l]!.ch : ' ');
+              }
+            }
+            for (let l = 0; l < LEVELS.length; l++) lines[l]!.push(rowChars[l]!.join(''));
+          }
+          for (let l = 0; l < LEVELS.length; l++) {
+            ctx.fillStyle = LEVELS[l]!.color;
+            for (let y = 0; y < rows; y++) {
+              const line = lines[l]![y]!;
+              if (line.trim() !== '') ctx.fillText(line, 0, y * CELL_H);
+            }
+          }
+        };
+
+        let now = 40_000;
+        const redraw = () => {
+          resize();
+          draw(now);
+        };
+        redraw();
+        window.addEventListener('resize', redraw);
+
+        const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!still) {
+          let last = 0;
+          const loop = (ms: number) => {
+            // ~14 fps: el salto entre cuadros es parte del carácter.
+            if (!document.hidden && ms - last > 70) {
+              last = ms;
+              now = ms + 40_000;
+              draw(now);
+            }
+            requestAnimationFrame(loop);
+          };
+          requestAnimationFrame(loop);
+        }
+        // La fuente web puede llegar después del primer cuadro: remedir.
+        document.fonts?.ready.then(redraw);
+      }
+    </script>
   </body>
 </html>
