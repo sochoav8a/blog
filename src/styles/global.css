@@ -837,6 +837,7 @@ main {
 
 .fileinfo dt {
   color: var(--color-muted);
+  white-space: nowrap;
 }
 
 .fileinfo dt::after {
@@ -927,54 +928,150 @@ main {
   content: '----------[ EOF ]------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------';
 }
 
-/* --- About: texto + láminas ASCII --- */
+/* --- About: texto y ficha a la izquierda, visor 3D a la derecha --- */
 
 .about {
   display: grid;
   gap: 2rem;
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
+  align-items: start;
 }
 
 @media (min-width: 64rem) {
   .about {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 4rem;
   }
 }
 
-.figures {
+.about-main {
+  min-width: 0;
+  max-width: 44rem;
+}
+
+/* Línea de comando que rotula cada sección. */
+.cmd {
+  margin-bottom: 0.75rem;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.cmd span {
+  color: var(--color-pop);
+  font-weight: 700;
+}
+
+.prose + .cmd {
+  margin-top: 2.25rem;
+}
+
+.about .fileinfo {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+/* Tags como histograma de caracteres: #ensayo ########.... 2 */
+.tagbars {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5ch;
-  align-items: start;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.15rem 2ch;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--color-line);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
 }
 
-.ascii-fig {
-  padding-inline: 1.5ch;
-  overflow: hidden;
-  user-select: none;
+.tagbars li {
+  display: contents;
 }
 
-.ascii-fig .box-body {
-  display: grid;
-  justify-content: center;
+.tagbars a {
+  text-decoration: none;
+  color: var(--color-accent);
 }
 
-.ascii-art {
-  font-size: clamp(0.3rem, 1.25vw, 0.55rem);
-  line-height: 1.3;
-  white-space: pre;
-  color: var(--color-deep);
-}
-
-.ascii-art-fine {
-  font-size: clamp(0.2rem, 1.05vw, 0.42rem);
-}
-
-/* Duotono del generador (pnpm ascii): las rachas oscuras de la imagen son
- * aquí las más luminosas — el retrato se lee como un negativo encendido. */
-.ascii-art .k {
+.tagbars a:hover {
   color: var(--color-bright);
+}
+
+.tagbars span:nth-child(2) {
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--color-pop);
+}
+
+.tagbars span:last-child {
+  text-align: right;
+  color: var(--color-bright);
+}
+
+/* --- Visor de modelos (ModelViewer.astro) --- */
+
+.viewer {
+  --fill: var(--color-inset);
+  min-width: 0;
+}
+
+.viewer-stage {
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  font-size: clamp(0.42rem, 2.05vw, 0.8rem);
+  font-weight: 600;
+  cursor: grab;
+  /* El arrastre horizontal gira; el vertical sigue desplazando la página. */
+  touch-action: pan-y;
+}
+
+.viewer-stage:active {
+  cursor: grabbing;
+  color: var(--color-accent);
+}
+
+.viewer-readout {
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--color-line);
+  font-size: var(--text-xs);
+  text-align: center;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.viewer-shapes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 2ch;
+  margin-top: 0.4rem;
+}
+
+/* Opción excluyente en texto: ( ) cube  (*) gem */
+.radio {
+  font: inherit;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.radio::before {
+  content: '( ) ';
+  color: var(--color-line);
+}
+
+.radio:hover {
+  color: var(--color-accent);
+}
+
+.radio[aria-pressed='true'] {
+  color: var(--color-bright);
+}
+
+.radio[aria-pressed='true']::before {
+  content: '(*) ';
+  color: var(--color-pop);
 }
 
 /*

@@ -1,8 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
-import AsciiFigure from '../components/AsciiFigure.astro';
-import { railLeft, railRight } from '../ascii/rails';
+import Box from '../components/Box.astro';
+import ModelViewer from '../components/ModelViewer.astro';
+import { getPublishedPosts, formatDate, postStats } from '../lib/posts';
 import { SITE } from '../site';
+
+// La ficha sale de los posts reales: nada de esto se escribe a mano.
+const posts = await getPublishedPosts();
+const stats = posts.map(postStats);
+const words = stats.reduce((sum, s) => sum + s.words, 0);
+const bytes = stats.reduce((sum, s) => sum + s.bytes, 0);
+const first = posts.at(-1);
+const latest = posts.at(0);
+
+const tagCounts = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of post.data.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+}
+const tags = [...tagCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const maxCount = Math.max(1, ...tags.map(([, count]) => count));
+const BAR = 12;
+const bar = (count: number) => {
+  const filled = Math.max(1, Math.round((count / maxCount) * BAR));
+  return '#'.repeat(filled) + '.'.repeat(BAR - filled);
+};
 ---
 
 <Base title="About" description={`Sobre ${SITE.author} y este sitio`}>
@@ -12,19 +33,74 @@ import { SITE } from '../site';
     <i aria-hidden="true"></i>
     <span>perfil</span>
   </div>
+
   <div class="about">
-    <div class="prose">
-      <p>
-        Soy {SITE.author}. Este blog reúne ensayos y bitácoras de lectura.
-      </p>
-      <p>
-        El contenido nace en un vault de Obsidian y se publica aquí.
-      </p>
-      <!-- Placeholder: edita esta página con tu propio texto. -->
+    <div class="about-main">
+      <p class="cmd" aria-hidden="true"><span>&gt;</span> cat about.txt</p>
+      <div class="prose">
+        <p>
+          Soy {SITE.author}. Este blog reúne ensayos y bitácoras de lectura.
+        </p>
+        <p>
+          El contenido nace en un vault de Obsidian y se publica aquí.
+        </p>
+        <!-- Placeholder: edita esta página con tu propio texto. -->
+      </div>
+
+      <p class="cmd" aria-hidden="true"><span>&gt;</span> stat memory-card-1</p>
+      <Box title="datos guardados">
+        <dl class="fileinfo">
+          <div>
+            <dt>bloques</dt>
+            <dd>{posts.length}</dd>
+          </div>
+          <div>
+            <dt>palabras</dt>
+            <dd>{words.toLocaleString('es')}</dd>
+          </div>
+          <div>
+            <dt>tamaño</dt>
+            <dd>{bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`}</dd>
+          </div>
+          {
+            first && (
+              <div>
+                <dt>primer bloque</dt>
+                <dd>{formatDate(first.data.date)}</dd>
+              </div>
+            )
+          }
+          {
+            latest && (
+              <div>
+                <dt>último bloque</dt>
+                <dd>
+                  <a href={`/posts/${latest.id}/`} data-nav>
+                    {latest.data.title}
+                  </a>
+                </dd>
+              </div>
+            )
+          }
+        </dl>
+        {
+          tags.length > 0 && (
+            <ul class="tagbars">
+              {tags.map(([tag, count]) => (
+                <li>
+                  <a href={`/tags/${tag}/`} data-nav>
+                    #{tag}
+                  </a>
+                  <span aria-hidden="true">{bar(count)}</span>
+                  <span>{count}</span>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </Box>
     </div>
-    <div class="figures">
-      <AsciiFigure figure={railLeft} />
-      <AsciiFigure figure={railRight} />
-    </div>
+
+    <ModelViewer />
   </div>
 </Base>

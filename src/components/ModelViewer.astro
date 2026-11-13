@@ -1,0 +1,157 @@
+---
+// Visor de modelos: un poliedro en ASCII que se puede girar arrastrando
+// (o con las flechas, con el visor enfocado) y cambiar de forma. Gira solo
+// hasta que lo tocas; al soltarlo conserva el impulso.
+import Box from './Box.astro';
+import { SHAPES, renderShape, type Shape } from '../lib/ascii3d';
+
+interface Props {
+  shape?: Shape;
+  cols?: number;
+  rows?: number;
+}
+
+const { shape = 'gem', cols = 52, rows = 24 } = Astro.props;
+const YAW = 0.6;
+const PITCH = 0.5;
+---
+
+<Box title="visor" class="viewer" status="arrastra para girar">
+  <div data-viewer data-shape={shape} data-cols={cols} data-rows={rows}>
+    <pre
+      class="a3d viewer-stage"
+      tabindex="0"
+      role="img"
+      aria-label="Modelo 3D en ASCII. Flechas para girar."
+      set:html={renderShape(shape, cols, rows, YAW, PITCH)}
+    />
+    <p class="viewer-readout" aria-hidden="true" data-readout>&nbsp;</p>
+    <div class="viewer-shapes" role="group" aria-label="Forma">
+      {
+        SHAPES.map((name) => (
+          <button type="button" class="radio" data-shape-option={name} aria-pressed={name === shape}>
+            {name}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</Box>
+
+<script>
+  import { renderShape, type Shape } from '../lib/ascii3d';
+
+  const root = document.querySelector<HTMLElement>('[data-viewer]');
+  const stage = root?.querySelector<HTMLElement>('.viewer-stage');
+  if (root && stage) {
+    const readout = root.querySelector<HTMLElement>('[data-readout]');
+    const options = [...root.querySelectorAll<HTMLButtonElement>('[data-shape-option]')];
+    const cols = Number(root.dataset.cols);
+    const rows = Number(root.dataset.rows);
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const IDLE = 0.6; // rad/s de giro en reposo
+    const LIMIT = 1.35; // tope de inclinación (rad)
+
+    let shape = root.dataset.shape as Shape;
+    let yaw = 0.6;
+    let pitch = 0.5;
+    let spinYaw = still ? 0 : IDLE;
+    let spinPitch = 0;
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let dirty = true;
+
+    const deg = (rad: number) => {
+      const d = Math.round((rad * 180) / Math.PI) % 360;
+      return String(d < 0 ? d + 360 : d).padStart(3, '0');
+    };
+    const paint = () => {
+      stage.innerHTML = renderShape(shape, cols, rows, yaw, pitch);
+      if (readout) {
+        const tilt = Math.round((pitch * 180) / Math.PI);
+        readout.textContent = `modelo ${shape} · giro ${deg(yaw)}° · inclinación ${tilt}°`;
+      }
+      dirty = false;
+    };
+
+    stage.addEventListener('pointerdown', (event) => {
+      dragging = true;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      spinYaw = 0;
+      spinPitch = 0;
+      stage.setPointerCapture(event.pointerId);
+    });
+    stage.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      const dx = (event.clientX - lastX) * 0.012;
+      const dy = (event.clientY - lastY) * 0.012;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      yaw += dx;
+      pitch = Math.min(LIMIT, Math.max(-LIMIT, pitch + dy));
+      // El último gesto queda como impulso al soltar.
+      spinYaw = dx * 30;
+      spinPitch = dy * 30;
+      dirty = true;
+    });
+    const release = () => {
+      dragging = false;
+      if (still) {
+        spinYaw = 0;
+        spinPitch = 0;
+      }
+    };
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
+
+    stage.addEventListener('keydown', (event) => {
+      const step = 0.2;
+      if (event.key === 'ArrowLeft') yaw -= step;
+      else if (event.key === 'ArrowRight') yaw += step;
+      else if (event.key === 'ArrowUp') pitch = Math.max(-LIMIT, pitch - step);
+      else if (event.key === 'ArrowDown') pitch = Math.min(LIMIT, pitch + step);
+      else return;
+      // Que las flechas no muevan además la selección de la página.
+      event.preventDefault();
+      event.stopPropagation();
+      spinYaw = 0;
+      spinPitch = 0;
+      dirty = true;
+    });
+
+    for (const option of options) {
+      option.addEventListener('click', () => {
+        shape = option.dataset.shapeOption as Shape;
+        for (const other of options) other.setAttribute('aria-pressed', String(other === option));
+        dirty = true;
+      });
+    }
+
+    let last = 0;
+    const loop = (ms: number) => {
+      if (!document.hidden && ms - last > 60) {
+        const dt = Math.min(0.2, (ms - last) / 1000);
+        last = ms;
+        if (!dragging) {
+          if (spinYaw !== 0 || spinPitch !== 0) {
+            yaw += spinYaw * dt;
+            pitch = Math.min(LIMIT, Math.max(-LIMIT, pitch + spinPitch * dt));
+            // El impulso decae hacia el giro de reposo (o hacia cero).
+            const rest = still ? 0 : Math.sign(spinYaw || 1) * IDLE;
+            spinYaw += (rest - spinYaw) * Math.min(1, dt * 1.5);
+            spinPitch *= Math.max(0, 1 - dt * 3);
+            if (Math.abs(spinPitch) < 0.01) spinPitch = 0;
+            if (still && Math.abs(spinYaw) < 0.01) spinYaw = 0;
+            dirty = true;
+          }
+        }
+        if (dirty) paint();
+      }
+      requestAnimationFrame(loop);
+    };
+    paint();
+    requestAnimationFrame(loop);
+  }
+</script>
