@@ -2,8 +2,8 @@
 
 /*
  * Tokens del sitio. Concepto: el menú de sistema de una consola de los 90
- * visto en un televisor de tubo, pero dibujado con caracteres. Azul sobre
- * negro, tramado en vez de degradados suaves, sombras duras, líneas de
+ * visto en un televisor de tubo, pero dibujado con caracteres. Gris pizarra
+ * con azul apagado y rojo, tramado en vez de degradados, sombras duras, líneas de
  * barrido; los marcos son texto (+--[ ]--+) y el 3D se renderiza en ASCII.
  * Todo en monoespaciada (IBM Plex Mono vía @fontsource; ver Base.astro).
  */
@@ -12,22 +12,22 @@
   --font-*: initial;
   --text-*: initial;
 
-  /* Colores (paleta por defecto: cobalto; las demás, más abajo) */
-  --color-paper: #03040d; /* fondo de pantalla */
-  --color-panel: #090e2c; /* relleno de los marcos: bloques, ficha, índice */
-  --color-inset: #010207; /* huecos hundidos: buscador, código */
-  --color-wash: #131c52; /* código en línea, tramas */
-  --color-ink: #d5deff;
-  --color-bright: #f4f7ff;
-  --color-muted: #8f9dda;
-  --color-line: #5870ea; /* trazo de los marcos */
-  --color-faint: #232e72; /* bloques libres */
-  --color-accent: #7aa7ff; /* enlaces, tags */
-  --color-pop: #7aa7ff; /* marcas: >, ##, ==, cursor, "ascii" */
-  --color-deep: #2f6bff; /* caras en sombra del 3D, niebla */
-  --color-shadow: #16268a; /* sombras duras, trama del fondo */
-  --color-warm: #ff5c6c; /* avisos */
-  --color-mark: #2444c4; /* selección */
+  /* Colores: gris pizarra de menú de sistema, azul apagado, marcas rojas */
+  --color-paper: #0c0e13; /* fondo de pantalla */
+  --color-panel: #181c26; /* relleno de los marcos: bloques, ficha, índice */
+  --color-inset: #06070a; /* huecos hundidos: buscador, código */
+  --color-wash: #2a3142; /* código en línea */
+  --color-ink: #cfd4e0;
+  --color-bright: #f5f6fa;
+  --color-muted: #8f97ab;
+  --color-line: #7f8aa8; /* trazo de los marcos */
+  --color-faint: #2d3342; /* bloques libres */
+  --color-accent: #9db4e8; /* enlaces, tags */
+  --color-pop: #e8413c; /* marcas: >, ##, ==, cursor, "ascii" */
+  --color-deep: #5d7ac4; /* caras en sombra del 3D, niebla */
+  --color-shadow: #2a3350; /* sombras duras, trama del fondo */
+  --color-warm: #f0a030; /* avisos */
+  --color-mark: #3a4a80; /* selección */
 
   /* Tipografía */
   --font-mono: "IBM Plex Mono", ui-monospace, "Courier New", monospace;
@@ -745,7 +745,7 @@ main {
 .corrupt-icon {
   font-size: var(--text-sm);
   line-height: 1.2;
-  color: var(--color-muted);
+  color: var(--color-pop);
 }
 
 /* --- Post: cabecera, rejilla y panel lateral --- */
@@ -1121,6 +1121,21 @@ main {
   box-shadow: 6px 6px 0 var(--color-shadow);
 }
 
+/* Resaltado de sintaxis (Shiki, tema css-variables): la misma paleta. */
+:root {
+  --astro-code-foreground: var(--color-ink);
+  --astro-code-background: var(--color-inset);
+  --astro-code-token-comment: var(--color-muted);
+  --astro-code-token-keyword: var(--color-pop);
+  --astro-code-token-function: var(--color-bright);
+  --astro-code-token-string: var(--color-accent);
+  --astro-code-token-string-expression: var(--color-accent);
+  --astro-code-token-constant: var(--color-warm);
+  --astro-code-token-parameter: var(--color-ink);
+  --astro-code-token-punctuation: var(--color-line);
+  --astro-code-token-link: var(--color-accent);
+}
+
 .prose pre code {
   background: none;
   color: inherit;
@@ -1141,6 +1156,7 @@ main {
 /* Separador de escena: una regla de guiones. */
 .prose hr {
   border: none;
+  height: 1em;
   margin: 2.5em 0;
   overflow: hidden;
   white-space: nowrap;
@@ -1199,112 +1215,4 @@ main {
   .slot-title a::before {
     animation: none !important;
   }
-}
-
-/*
- * Paletas alternativas. Se activan con <html data-palette="…">; el selector
- * de la esquina (solo en `pnpm dev`, ver Base.astro) las cambia en vivo.
- * Cuando elijas una, mueve sus valores al bloque @theme de arriba y borra
- * el resto junto con el selector.
- */
-
-/* duo: la misma base azul, con las marcas en rojo. */
-:root[data-palette='duo'] {
-  --color-pop: #ff4d5e;
-  --color-warm: #ffb347;
-}
-
-/* carmesi: negro y rojo de alarma. */
-:root[data-palette='carmesi'] {
-  --color-paper: #0a0304;
-  --color-panel: #1c080b;
-  --color-inset: #050102;
-  --color-wash: #3a1016;
-  --color-ink: #f0dcd8;
-  --color-bright: #fff5f0;
-  --color-muted: #b98e8b;
-  --color-line: #c2414c;
-  --color-faint: #4f181e;
-  --color-accent: #ff8a80;
-  --color-pop: #ff3344;
-  --color-deep: #d9202f;
-  --color-shadow: #5c0d16;
-  --color-warm: #ffb347;
-  --color-mark: #a3121f;
-}
-
-/* bios: gris pizarra de menú de sistema, azul apagado y marcas rojas. */
-:root[data-palette='bios'] {
-  --color-paper: #0c0e13;
-  --color-panel: #181c26;
-  --color-inset: #06070a;
-  --color-wash: #2a3142;
-  --color-ink: #cfd4e0;
-  --color-bright: #f5f6fa;
-  --color-muted: #8f97ab;
-  --color-line: #7f8aa8;
-  --color-faint: #2d3342;
-  --color-accent: #9db4e8;
-  --color-pop: #e8413c;
-  --color-deep: #5d7ac4;
-  --color-shadow: #2a3350;
-  --color-warm: #f0a030;
-  --color-mark: #3a4a80;
-}
-
-/* noche: añil profundo con cian eléctrico y marcas magenta-rojo. */
-:root[data-palette='noche'] {
-  --color-paper: #06031a;
-  --color-panel: #100a35;
-  --color-inset: #02010b;
-  --color-wash: #1f1560;
-  --color-ink: #d9d6ff;
-  --color-bright: #f6f4ff;
-  --color-muted: #9a93d6;
-  --color-line: #6a5cf0;
-  --color-faint: #2a2170;
-  --color-accent: #5fd4ff;
-  --color-pop: #ff4f8b;
-  --color-deep: #4a3df0;
-  --color-shadow: #24178f;
-  --color-warm: #ffb347;
-  --color-mark: #3a2bc4;
-}
-
-/* --- Selector de paleta (solo desarrollo) --- */
-
-.palettes {
-  position: fixed;
-  right: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 60;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 1ch;
-  max-width: calc(100vw - 1.5rem);
-  padding: 0.3rem 1ch;
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-  background-color: var(--color-inset);
-  border: 1px dashed var(--color-pop);
-}
-
-.palettes button {
-  font: inherit;
-  color: var(--color-ink);
-  cursor: pointer;
-}
-
-.palettes button::before {
-  content: '( ) ';
-  color: var(--color-line);
-}
-
-.palettes button[aria-pressed='true'] {
-  color: var(--color-bright);
-}
-
-.palettes button[aria-pressed='true']::before {
-  content: '(*) ';
-  color: var(--color-pop);
 }
