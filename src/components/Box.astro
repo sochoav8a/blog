@@ -1,0 +1,26 @@
+---
+// Marco dibujado con caracteres: +-[ título ]-----+ arriba, | a los lados
+// y +-----[ estado ]-+ abajo. Los trazos son texto real (generado en CSS y
+// recortado al tamaño de la caja), no bordes.
+interface Props {
+  title?: string;
+  status?: string;
+  /** Marca la caja como seleccionable: resalta y acelera su Ascii3D. */
+  hot?: boolean;
+  class?: string;
+}
+
+const { title, status, hot = false, class: className } = Astro.props;
+---
+
+<div class:list={['box', className]} data-hot={hot ? '' : undefined}>
+  <span class="box-edge box-t" aria-hidden="true"
+    ><i>+-</i>{title && <b>[ {title} ]</b>}<i class="box-fill"></i><i>+</i></span
+  >
+  <span class="box-side box-l" aria-hidden="true"></span>
+  <span class="box-side box-r" aria-hidden="true"></span>
+  <div class="box-body"><slot /></div>
+  <span class="box-edge box-b" aria-hidden="true"
+    ><i>+</i><i class="box-fill"></i>{status && <b>[ {status} ]</b>}<i>-+</i></span
+  >
+</div>

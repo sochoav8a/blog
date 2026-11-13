@@ -1,20 +1,20 @@
 ---
 import Base from '../layouts/Base.astro';
+import Box from '../components/Box.astro';
 ---
 
 <Base title="404">
-  <div class="corrupt">
-    <div class="save-icon" aria-hidden="true">
-      <div class="tower tower-dead" style="--h: 1.6rem">
-        <i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
-    </div>
+  <Box class="corrupt" title="error" status="404">
+    <pre class="corrupt-icon" aria-hidden="true">{`  ?%#@?.
+ #?  .%?:
+ %@?##?.@
+ :?.  ?#%
+  ?@%#?:`}</pre>
     <div>
-      <p class="corrupt-code">404</p>
-      <h1 class="post-title">Datos corruptos</h1>
-      <p class="mt-4 text-muted">
-        Esta página no existe o se dañó en el camino. <a href="/" data-nav>Volver al archivo</a>.
+      <h1 class="post-title">datos corruptos</h1>
+      <p class="mt-3 text-muted">
+        Este bloque no existe o se dañó en el camino. <a href="/" data-nav>Volver al archivo</a>.
       </p>
     </div>
-  </div>
+  </Box>
 </Base>

@@ -7,21 +7,24 @@ import { SITE } from '../site';
 
 <Base title="About" description={`Sobre ${SITE.author} y este sitio`}>
   <p class="crumb"><a href="/" data-nav>archivo</a> / about</p>
-  <div class="section-head mt-4">
-    <h1>About</h1>
+  <div class="section-head">
+    <h1>about</h1>
+    <i aria-hidden="true"></i>
     <span>perfil</span>
   </div>
-  <div class="figures mt-8">
-    <AsciiFigure figure={railLeft} />
-    <AsciiFigure figure={railRight} />
-  </div>
-  <div class="prose mt-10">
-    <p>
-      Soy {SITE.author}. Este blog reúne ensayos y bitácoras de lectura.
-    </p>
-    <p>
-      El contenido nace en un vault de Obsidian y se publica aquí.
-    </p>
-    <!-- Placeholder: edita esta página con tu propio texto. -->
+  <div class="about">
+    <div class="prose">
+      <p>
+        Soy {SITE.author}. Este blog reúne ensayos y bitácoras de lectura.
+      </p>
+      <p>
+        El contenido nace en un vault de Obsidian y se publica aquí.
+      </p>
+      <!-- Placeholder: edita esta página con tu propio texto. -->
+    </div>
+    <div class="figures">
+      <AsciiFigure figure={railLeft} />
+      <AsciiFigure figure={railRight} />
+    </div>
   </div>
 </Base>

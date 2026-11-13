@@ -1,6 +1,10 @@
 ---
-// Listado de posts como "navegador de datos guardados": cada entrada lleva
-// una torre 3D cuya altura crece con la longitud del texto.
+// Listado de posts como memory card: una cuadrícula de bloques, cada uno
+// con su icono 3D en ASCII (la forma sale del slug, así que es estable).
+// Los huecos que sobran se dibujan como bloques vacíos.
+import Box from './Box.astro';
+import Ascii3D from './Ascii3D.astro';
+import { shapeFor } from '../lib/ascii3d';
 import { formatDate, postStats, type Post } from '../lib/posts';
 
 interface Props {
@@ -8,14 +12,16 @@ interface Props {
 }
 
 const { posts } = Astro.props;
+const COLUMNS = 3;
+const slots = Math.max(COLUMNS * 2, Math.ceil(posts.length / COLUMNS) * COLUMNS);
+const empty = Array.from({ length: slots - posts.length }, (_, i) => posts.length + i + 1);
+const block = (n: number) => String(n).padStart(2, '0');
 ---
 
-<ul id="post-list" class="saves">
+<ul id="post-list" class="card">
   {
     posts.map((post, i) => {
       const stats = postStats(post);
-      // 0.9rem (nota mínima) → 2.6rem (≈1500 palabras o más).
-      const height = 0.9 + Math.min(1, stats.words / 1500) * 1.7;
       return (
         <li
           data-post={[
@@ -25,36 +31,35 @@ const { posts } = Astro.props;
           ].join(' ')}
           data-tags={post.data.tags.join(' ')}
         >
-          <article class="save">
-            <div class="save-icon" aria-hidden="true">
-              <div class="tower" style={`--h: ${height.toFixed(2)}rem; --delay: ${-i * 1.7}s`}>
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-            </div>
-            <div class="min-w-0">
-              <h2 class="save-title">
+          <Box class="slot" title={block(i + 1)} status={stats.size} hot>
+            <article>
+              <Ascii3D shape={shapeFor(post.id)} yaw={0.6 + i * 0.9} class="slot-icon" />
+              <h2 class="slot-title">
                 <a href={`/posts/${post.id}/`} data-nav>
                   {post.data.title}
                 </a>
               </h2>
-              <p class="save-desc">{post.data.description}</p>
-              <p class="save-meta">
+              <p class="slot-desc">{post.data.description}</p>
+              <p class="slot-meta">
                 <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
-                <span>{stats.size}</span>
                 {post.data.draft && <span class="text-warm">draft</span>}
                 {post.data.tags.map((tag) => (
                   <a href={`/tags/${tag}/`}>#{tag}</a>
                 ))}
               </p>
-            </div>
-          </article>
+            </article>
+          </Box>
         </li>
       );
     })
+  }
+  {
+    empty.map((n) => (
+      <li class="slot-empty" aria-hidden="true">
+        <Box class="slot" title={block(n)}>
+          <p>bloque libre</p>
+        </Box>
+      </li>
+    ))
   }
 </ul>

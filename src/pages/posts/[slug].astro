@@ -1,6 +1,9 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import Box from '../../components/Box.astro';
+import Ascii3D from '../../components/Ascii3D.astro';
+import { shapeFor } from '../../lib/ascii3d';
 import { getPublishedPosts, formatDate, postStats, type Post } from '../../lib/posts';
 
 export async function getStaticPaths() {
@@ -13,8 +16,9 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const stats = postStats(post);
+const toc = headings.filter((heading) => heading.depth <= 3);
 ---
 
 <Base
@@ -23,54 +27,128 @@ const stats = postStats(post);
   ogImage={`/og/${post.id}.png`}
   ogType="article"
 >
-  <article>
-    <header class="mb-12">
+  <article class="post">
+    <header class="post-head">
       <p class="crumb"><a href="/" data-nav>archivo</a> / {post.id}</p>
       <h1 class="post-title">{post.data.title}</h1>
       <p class="post-desc">{post.data.description}</p>
-      <!-- Ficha del archivo, como la pantalla de datos de una partida guardada. -->
-      <dl class="fileinfo">
-        <div>
-          <dt>Fecha</dt>
-          <dd><time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time></dd>
-        </div>
-        {
-          post.data.updated && (
-            <div>
-              <dt>Actualizado</dt>
-              <dd>
-                <time datetime={post.data.updated.toISOString()}>
-                  {formatDate(post.data.updated)}
-                </time>
-              </dd>
-            </div>
-          )
-        }
-        <div>
-          <dt>Tamaño</dt>
-          <dd>{stats.size}</dd>
-        </div>
-        <div>
-          <dt>Lectura</dt>
-          <dd>{stats.minutes} min</dd>
-        </div>
-        {
-          post.data.tags.length > 0 && (
-            <div>
-              <dt>Tags</dt>
-              <dd class="flex flex-wrap gap-x-3">
-                {post.data.tags.map((tag) => (
-                  <a href={`/tags/${tag}/`}>#{tag}</a>
-                ))}
-              </dd>
-            </div>
-          )
-        }
-      </dl>
     </header>
-    <div class="prose">
-      <Content />
+
+    <!-- Texto a la izquierda; a la derecha un panel fijo con el icono del
+         bloque, la ficha del archivo y el índice. En móvil el panel va
+         antes del texto, sin icono. -->
+    <div class="post-grid">
+      <div class="prose">
+        <Content />
+        <p class="eof" aria-hidden="true"></p>
+      </div>
+
+      <aside class="post-side">
+        <Ascii3D shape={shapeFor(post.id)} cols={38} rows={17} class="post-icon" />
+        <Box title="archivo">
+          <dl class="fileinfo">
+            <div>
+              <dt>fecha</dt>
+              <dd>
+                <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+              </dd>
+            </div>
+            {
+              post.data.updated && (
+                <div>
+                  <dt>act.</dt>
+                  <dd>
+                    <time datetime={post.data.updated.toISOString()}>
+                      {formatDate(post.data.updated)}
+                    </time>
+                  </dd>
+                </div>
+              )
+            }
+            <div>
+              <dt>tamaño</dt>
+              <dd>{stats.size}</dd>
+            </div>
+            <div>
+              <dt>lectura</dt>
+              <dd>{stats.minutes} min</dd>
+            </div>
+            {
+              post.data.tags.length > 0 && (
+                <div>
+                  <dt>tags</dt>
+                  <dd>
+                    {post.data.tags.map((tag) => (
+                      <a href={`/tags/${tag}/`}>#{tag}</a>
+                    ))}
+                  </dd>
+                </div>
+              )
+            }
+          </dl>
+          <p class="readbar" aria-hidden="true" hidden>
+            <span id="read-bar"></span>
+            <span id="read-pct"></span>
+          </p>
+        </Box>
+        {
+          toc.length > 0 && (
+            <Box title="índice" class="toc-box">
+              <nav class="toc" aria-label="Índice del artículo">
+                <ol>
+                  {toc.map((heading) => (
+                    <li class:list={[heading.depth === 3 && 'toc-sub']}>
+                      <a href={`#${heading.slug}`}>{heading.text}</a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            </Box>
+          )
+        }
+      </aside>
     </div>
-    <p class="eof" aria-hidden="true"><span>fin de los datos</span></p>
   </article>
 </Base>
+
+<script>
+  // --- Barra de avance de lectura en ASCII: [#######.............] 35% ---
+  const bar = document.getElementById('read-bar');
+  const pct = document.getElementById('read-pct');
+  const prose = document.querySelector<HTMLElement>('.prose');
+  if (bar && pct && prose) {
+    bar.parentElement!.hidden = false;
+    const CELLS = 18;
+    const update = () => {
+      const rect = prose.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      const ratio = total <= 0 ? 1 : Math.min(1, Math.max(0, -rect.top / total));
+      const filled = Math.round(ratio * CELLS);
+      bar.textContent = `[${'#'.repeat(filled)}${'.'.repeat(CELLS - filled)}]`;
+      pct.textContent = `${Math.round(ratio * 100)}%`.padStart(4, ' ');
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+  }
+
+  // --- Índice: marca la sección que se está leyendo ---
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+  if (links.length > 0) {
+    const byId = new Map(links.map((link) => [decodeURIComponent(link.hash.slice(1)), link]));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          for (const link of links) link.removeAttribute('aria-current');
+          byId.get(entry.target.id)?.setAttribute('aria-current', 'true');
+        }
+      },
+      { rootMargin: '0px 0px -70% 0px' },
+    );
+    for (const id of byId.keys()) {
+      const heading = document.getElementById(id);
+      if (heading) observer.observe(heading);
+    }
+  }
+</script>

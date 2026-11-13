@@ -1,6 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
+import Ascii3D from '../components/Ascii3D.astro';
+import Box from '../components/Box.astro';
 import { getPublishedPosts } from '../lib/posts';
 import { SITE } from '../site';
 
@@ -24,51 +26,61 @@ const asciiLines = [
   ' | (_| \\__ \\ (__| | |',
   '  \\__,_|___/\\___|_|_|',
 ];
-const widthSantiago = Math.max(...santiagoLines.map((line) => line.length));
-const widthAscii = Math.max(...asciiLines.map((line) => line.length));
-const pad = ' '.repeat(Math.max(0, widthSantiago - widthAscii));
-// Una línea = un span en bloque: así cada una puede "imprimirse" escalonada
-// (animación .masthead-line; --i marca el turno).
-const mastheadLines = [
-  ...santiagoLines.map((line) => ({ line, accent: false })),
-  ...asciiLines.map((line) => ({ line: pad + line, accent: true })),
+// Dos bloques independientes: en ancho "ascii" se alinea al borde derecho
+// de "santiago"; en móvil se apilan a la izquierda (CSS: .masthead).
+const blocks = [
+  { lines: santiagoLines, accent: false },
+  { lines: asciiLines, accent: true },
 ];
 ---
 
 <Base>
   <h1 class="sr-only">{SITE.title}</h1>
-  <pre
-    class="masthead"
-    role="img"
-    aria-label={SITE.title}>{mastheadLines.map(({ line, accent }, i) => <span class:list={['masthead-line', accent && 'masthead-accent']} style={`--i: ${i}`}>{line}</span>)}</pre>
-  <p class="masthead-tagline">
-    {SITE.description.toLowerCase().replace(/\.$/, '')}
-    <span class="cursor" aria-hidden="true"></span>
-  </p>
 
-  <div class="section-head mt-16">
-    <h2>Archivo</h2>
-    <span>{posts.length} {posts.length === 1 ? 'entrada' : 'entradas'}</span>
+  <section class="hero">
+    <div>
+      <div class="masthead" role="img" aria-label={SITE.title}>
+        {
+          blocks.map(({ lines, accent }) => (
+            <pre class:list={[accent && 'masthead-accent']}>{lines.join('\n')}</pre>
+          ))
+        }
+      </div>
+      <p class="masthead-tagline">
+        <span aria-hidden="true">&gt; </span>{SITE.description.toLowerCase().replace(/\.$/, '')}<span
+          class="cursor"
+          aria-hidden="true"></span>
+      </p>
+    </div>
+    <Ascii3D shape="gem" cols={46} rows={23} yaw={0.4} class="hero-shape" />
+  </section>
+
+  <div class="section-head">
+    <h2>memory card 1</h2>
+    <i aria-hidden="true"></i>
+    <span>{posts.length} {posts.length === 1 ? 'bloque' : 'bloques'}</span>
   </div>
 
   <!-- Buscador cliente: filtra el listado por título/descripción/tags.
        Arranca oculto y lo revela el script, así sin JS no hay UI muerta
        (las páginas /tags/ siguen siendo la vía navegable). -->
-  <section data-filter hidden class="mt-6" aria-label="Buscar y filtrar posts">
-    <label class="search">
-      <span aria-hidden="true">&gt;</span>
-      <input
-        type="search"
-        placeholder="buscar…"
-        aria-label="Buscar por título, descripción o tag"
-      />
-      <span id="filter-count" class="search-count" aria-live="polite"
-        >{posts.length}/{posts.length}</span
-      >
-    </label>
+  <section data-filter hidden class="mt-5" aria-label="Buscar y filtrar posts">
+    <Box class="search-box">
+      <label class="search">
+        <span aria-hidden="true">&gt;</span>
+        <input
+          type="search"
+          placeholder="buscar…"
+          aria-label="Buscar por título, descripción o tag"
+        />
+        <span id="filter-count" class="search-count" aria-live="polite"
+          >{posts.length}/{posts.length}</span
+        >
+      </label>
+    </Box>
     {
       allTags.length > 0 && (
-        <div class="mt-3 flex flex-wrap gap-2">
+        <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1">
           {allTags.map((tag) => (
             <button type="button" class="chip" data-chip={tag} aria-pressed="false">
               #{tag}
@@ -79,11 +91,11 @@ const mastheadLines = [
     }
   </section>
 
-  <div class="mt-8">
+  <div class="mt-6">
     <PostList posts={posts} />
   </div>
-  <p id="filter-empty" hidden class="mt-10 text-sm text-muted">
-    No hay datos —
+  <p id="filter-empty" hidden class="mt-8 text-sm text-muted">
+    no hay datos —
     <button type="button" id="filter-reset" class="cursor-pointer underline hover:text-accent">
       limpiar
     </button>

@@ -1,0 +1,72 @@
+---
+// Un poliedro low-poly dibujado con caracteres. El primer cuadro sale del
+// build (se ve sin JS y con movimiento reducido); el script lo hace girar.
+// Dentro de un contenedor [data-hot] gira más rápido al seleccionarlo.
+import { renderShape, type Shape } from '../lib/ascii3d';
+
+interface Props {
+  shape: Shape;
+  cols?: number;
+  rows?: number;
+  /** Ángulo inicial en radianes (para que no giren todos a la vez). */
+  yaw?: number;
+  class?: string;
+}
+
+const { shape, cols = 18, rows = 9, yaw = 0.6, class: className } = Astro.props;
+---
+
+<pre
+  class:list={['a3d', className]}
+  aria-hidden="true"
+  data-a3d
+  data-shape={shape}
+  data-cols={cols}
+  data-rows={rows}
+  data-yaw={yaw}
+  set:html={renderShape(shape, cols, rows, yaw)}
+/>
+
+<script>
+  import { renderShape, type Shape } from '../lib/ascii3d';
+
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const figures = [...document.querySelectorAll<HTMLElement>('[data-a3d]')];
+  if (!still && figures.length > 0) {
+    // Solo se redibujan las figuras que están en pantalla.
+    const visible = new Set<HTMLElement>();
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const el = entry.target as HTMLElement;
+        if (entry.isIntersecting) visible.add(el);
+        else visible.delete(el);
+      }
+    });
+    const yaws = new Map<HTMLElement, number>();
+    for (const el of figures) {
+      observer.observe(el);
+      yaws.set(el, Number(el.dataset.yaw) || 0);
+    }
+    let last = 0;
+    const loop = (ms: number) => {
+      // ~11 cuadros por segundo: el salto entre cuadros es parte del carácter.
+      if (!document.hidden && ms - last > 90) {
+        const dt = Math.min(0.25, (ms - last) / 1000);
+        last = ms;
+        for (const el of visible) {
+          const hot = el.closest('[data-hot]')?.matches(':hover, :focus-within') ?? false;
+          const yaw = (yaws.get(el) ?? 0) + dt * (hot ? 2.8 : 0.75);
+          yaws.set(el, yaw);
+          el.innerHTML = renderShape(
+            el.dataset.shape as Shape,
+            Number(el.dataset.cols),
+            Number(el.dataset.rows),
+            yaw,
+          );
+        }
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+</script>
