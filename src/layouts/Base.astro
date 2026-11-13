@@ -24,6 +24,13 @@ const pageTitle = title ? `${title} — ${SITE.title}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const isHome = Astro.url.pathname === '/';
 const path = `~${Astro.url.pathname}`;
+// Solo dev: aplica la paleta guardada (o la de ?paleta=nombre) antes de pintar.
+const paletteBoot = `try {
+  const q = new URLSearchParams(location.search).get('paleta');
+  if (q !== null) localStorage.setItem('palette', q === 'cobalto' ? '' : q);
+  const p = localStorage.getItem('palette');
+  if (p) document.documentElement.dataset.palette = p;
+} catch {}`;
 ---
 
 <html lang="es">
@@ -31,6 +38,11 @@ const path = `~${Astro.url.pathname}`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#03040d" />
+    {
+      import.meta.env.DEV && (
+        <script is:inline set:html={paletteBoot} />
+      )
+    }
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -80,7 +92,46 @@ const path = `~${Astro.url.pathname}`;
       </footer>
     </div>
 
+    {
+      /* Selector de paleta: herramienta temporal para comparar, solo en dev. */
+      import.meta.env.DEV && (
+        <div class="palettes" role="group" aria-label="Paleta (solo desarrollo)">
+          <span>paleta:</span>
+          {['cobalto', 'duo', 'bios', 'noche', 'carmesi'].map((name) => (
+            <button type="button" data-palette-option={name} aria-pressed="false">
+              {name}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
     <script>
+      // --- Selector de paleta (solo existe en dev) ---
+      const options = [...document.querySelectorAll<HTMLButtonElement>('[data-palette-option]')];
+      if (options.length > 0) {
+        const root = document.documentElement;
+        const mark = () => {
+          const current = root.dataset.palette ?? 'cobalto';
+          for (const option of options) {
+            option.setAttribute('aria-pressed', String(option.dataset.paletteOption === current));
+          }
+        };
+        for (const option of options) {
+          option.addEventListener('click', () => {
+            const name = option.dataset.paletteOption ?? 'cobalto';
+            if (name === 'cobalto') delete root.dataset.palette;
+            else root.dataset.palette = name;
+            try {
+              localStorage.setItem('palette', name === 'cobalto' ? '' : name);
+            } catch {}
+            mark();
+            document.dispatchEvent(new Event('palette'));
+          });
+        }
+        mark();
+      }
+
       // --- Reloj del menú ---
       const clock = document.getElementById('clock');
       if (clock) {
@@ -129,14 +180,21 @@ const path = `~${Astro.url.pathname}`;
       const canvas = document.getElementById('fog') as HTMLCanvasElement | null;
       const ctx = canvas?.getContext('2d');
       if (canvas && ctx) {
+        // Los colores salen de los tokens CSS (cambian con la paleta).
         const LEVELS = [
-          { ch: '.', color: 'rgba(58, 92, 220, 0.30)' },
-          { ch: ':', color: 'rgba(66, 104, 235, 0.42)' },
-          { ch: '+', color: 'rgba(84, 126, 250, 0.55)' },
-          { ch: '*', color: 'rgba(120, 160, 255, 0.70)' },
-          { ch: '#', color: 'rgba(170, 200, 255, 0.85)' },
-          { ch: '@', color: 'rgba(225, 236, 255, 0.95)' },
+          { ch: '.', token: '--color-deep', alpha: 0.4 },
+          { ch: ':', token: '--color-deep', alpha: 0.55 },
+          { ch: '+', token: '--color-deep', alpha: 0.75 },
+          { ch: '*', token: '--color-accent', alpha: 0.75 },
+          { ch: '#', token: '--color-accent', alpha: 0.95 },
+          { ch: '@', token: '--color-bright', alpha: 0.95 },
         ];
+        let colors: string[] = [];
+        const readColors = () => {
+          const style = getComputedStyle(document.documentElement);
+          colors = LEVELS.map(({ token }) => style.getPropertyValue(token).trim() || '#7aa7ff');
+        };
+        readColors();
         const ORBS = 7;
         const CELL_H = 18;
         let cellW = 9;
@@ -206,7 +264,8 @@ const path = `~${Astro.url.pathname}`;
             for (let l = 0; l < LEVELS.length; l++) lines[l]!.push(rowChars[l]!.join(''));
           }
           for (let l = 0; l < LEVELS.length; l++) {
-            ctx.fillStyle = LEVELS[l]!.color;
+            ctx.fillStyle = colors[l]!;
+            ctx.globalAlpha = LEVELS[l]!.alpha;
             for (let y = 0; y < rows; y++) {
               const line = lines[l]![y]!;
               if (line.trim() !== '') ctx.fillText(line, 0, y * CELL_H);
@@ -221,6 +280,10 @@ const path = `~${Astro.url.pathname}`;
         };
         redraw();
         window.addEventListener('resize', redraw);
+        document.addEventListener('palette', () => {
+          readColors();
+          draw(now);
+        });
 
         const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!still) {
